@@ -19,11 +19,3 @@ To create ALL movies from PNG's use provided script (MEncoder required) :
 
 ./parallel_movie_encode.sh
 
-Changelog
-
-2022-12-18: Previous version stopped due to misspelled triple-alpha reaction, which was finally corrected.
-The only change reqired is to edit file history_columns.list:
-
-tri_alfa -> tri_alpha
-
-Above change is required for Power plot to show energy from He burning.
