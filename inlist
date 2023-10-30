@@ -1,0 +1,43 @@
+&star_job
+  create_pre_main_sequence_model = .true.
+  pgstar_flag = .true.   !wizualizacja
+&end
+
+&eos
+  !EMPTY SECTION
+&end
+
+&kap
+  Zbase = 0.02d0 ! Metalicity
+&end
+
+&controls
+
+  initial_mass = 1.0d0 ! Msun units
+  initial_z = 0.02d0
+
+  ! Parametry wiatru gwiazdowego
+  cool_wind_RGB_scheme = 'Reimers'
+  Reimers_scaling_factor = 0.1d0
+  cool_wind_AGB_scheme = 'Blocker'
+  Blocker_scaling_factor = 0.5d0
+  hot_wind_scheme = 'Vink'
+  Vink_scaling_factor = 1.0d0
+  
+  convergence_ignore_equL_residuals=.true.
+  energy_eqn_option = 'dedt'
+  varcontrol_target = 1.0d-3
+
+  log_L_lower_limit = -3.9d0
+
+&end
+
+
+&pgstar
+
+  read_extra_pgstar_inlist(1) = .true.
+  extra_pgstar_inlist_name(1) = 'inlist.pgstar'
+
+&end
+
+

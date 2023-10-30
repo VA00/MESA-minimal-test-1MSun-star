@@ -1,0 +1,29 @@
+Absolutely minimal setup for evolution of Sun-like star in MESA r22.11.1
+starting with homogeneous cloud of H/He ending with cooling white dwarf.
+
+To run stellar evolution, first compile "star" code
+
+./mk
+
+and run from the beginning:
+
+./rn
+
+
+Entire evolution should take ~14000 steps and from 70 minutes (high-end CPU) to several (~5h on 4-core VM) hours.   New dirs will be created
+png/    -- a lot of visualization
+LOGS/   -- evolution data
+photos/ -- restart "photos"
+
+To create ALL movies from PNG's use provided script (MEncoder required) :
+
+./parallel_movie_encode.sh
+
+Changelog
+
+2022-12-18: Previous version stopped due to misspelled triple-alpha reaction, which was finally corrected.
+The only change reqired is to edit file history_columns.list:
+
+tri_alfa -> tri_alpha
+
+Above change is required for Power plot to show energy from He burning.
