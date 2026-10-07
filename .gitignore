@@ -1,0 +1,21 @@
+# MESA build products
+make/*.o
+make/*.mod
+make/*.smod
+star
+star.exe
+
+# MESA run output
+LOGS/
+photos/
+png/
+restart_photo
+.mesa_temp_cache/
+testhub.yml
+run.log
+
+# LaTeX auxiliary files
+doc/*.aux
+doc/*.log
+doc/*.out
+doc/*.toc

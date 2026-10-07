@@ -1,0 +1,265 @@
+# makefile_header for building MESA natively on Windows (no WSL, no Cygwin)
+# with MinGW-w64 gfortran (MSYS2 UCRT64) and GNU make (mingw32-make).
+#
+# Installed over $(MESA_DIR)/utils/makefile_header by install_mesa.ps1
+# (the original is kept as makefile_header.orig).
+#
+# Recipes are executed by cmd.exe; helper scripts are PowerShell 7.
+
+ifndef MESA_DIR
+$(error MESA_DIR enviroment variable is not set)
+endif
+
+# MinGW toolchain root (override with environment variable MESA_WIN_TOOLCHAIN)
+ifndef MESA_WIN_TOOLCHAIN
+MESA_WIN_TOOLCHAIN = C:/msys64/ucrt64
+endif
+
+ifndef OPT_LEVEL
+OPT_LEVEL = 2
+endif
+
+# step 1) compilers
+
+FC = gfortran
+CC = gcc
+
+# if you need special flags for the compiler, define them here:
+SPECIAL_FC_FLAGS =
+SPECIAL_C_FLAGS = -O2
+
+
+# step 2) crmath (correctly rounded math, needs crmath + crlibm built with build_crmath.ps1)
+
+ifndef USE_CRMATH
+USE_CRMATH = NO
+endif
+
+ifeq ($(USE_CRMATH),YES)
+LOAD_CRMATH = -L$(MESA_DIR)/lib -lcrmath -lcrlibm
+endif
+
+# step 3) LAPACK and BLAS: use the sources shipped with mesa/mtx
+
+WHICH_LAPACK95 =
+WHICH_LAPACK = USE_SRCS
+WHICH_BLAS = USE_SRCS
+LOAD_LAPACK95 =
+LOAD_LAPACK = -lmesalapack
+LOAD_BLAS = -lmesablas
+
+
+# step 4) PGPLOT
+
+ifndef USE_PGSTAR
+USE_PGSTAR = NO
+endif
+LOAD_PGPLOT =
+
+
+# step 6) HDF5 (MSYS2 package mingw-w64-ucrt-x86_64-hdf5, Fortran interface),
+#         linked statically (dependencies from ucrt64/lib/pkgconfig/hdf5.pc, Libs.private)
+
+HDF5_INCLUDE = -I$(MESA_WIN_TOOLCHAIN)/include
+LOAD_HDF5 = -L$(MESA_WIN_TOOLCHAIN)/lib -Wl,-Bstatic -lhdf5_fortran -lhdf5_f90cstub -lhdf5 \
+   -laws-c-s3 -laws-c-auth -laws-c-sdkutils -laws-c-http -laws-c-io -laws-c-cal \
+   -laws-c-compression -laws-checksums -laws-c-common -lz-ng -lsz -laec -Wl,-Bdynamic \
+   -lwsock32 -lncrypt -lbcrypt -lkernel32 -lws2_32 -lshlwapi -lpsapi -lcrypt32 -lsecur32
+
+
+# step 7) GYRE and ADIPLS are not built on Windows (yet)
+
+USE_GYRE = NO
+USE_ADIPLS = NO
+
+
+# step 8) OpenMP
+
+USE_OPENMP = YES
+
+
+# step 9) shared libraries are not supported on Windows
+
+USE_SHARED = NO
+
+
+#################################################################
+
+SKIP_NAN_TRAPS = YES
+
+FCbasic = -Wno-uninitialized -fno-range-check -fmax-errors=7 -fdiagnostics-color $(SPECIAL_FC_FLAGS) $(FCbasic2)
+FCbasic2 = -fprotect-parens -fno-sign-zero -fbacktrace -ggdb -finit-real=snan
+
+FCstandard = -std=f2008 -Wno-error=tabs
+
+FCimpno = -fimplicit-none
+FCchecks = -fbounds-check -Wuninitialized -Warray-bounds
+FCwarn = -Wunused-value -W -Wno-compare-reals -Wno-unused-parameter -Wno-function-elimination -Waliasing
+FCtrapNANs = -ffpe-trap=invalid,overflow,zero
+
+FC_fixed_preprocess = -x f77-cpp-input
+FC_free_preprocess = -x f95-cpp-input
+FCfixed = -ffixed-form -ffixed-line-length-none $(FC_fixed_preprocess)
+FCfixed72 = -ffixed-form $(FC_fixed_preprocess)
+FCfree = -ffree-form -ffree-line-length-none $(FC_free_preprocess)
+FCopt = -O${OPT_LEVEL} -ftree-vectorize
+FCdebug = -ggdb
+FCstatic =
+ifeq ($(USE_OPENMP),YES)
+FCopenmp = -fopenmp
+else
+FCopenmp =
+endif
+
+LIB_TOOL_STATIC = ar crs
+LIB_SUFFIX_STATIC = a
+
+LIB_TOOL = $(LIB_TOOL_STATIC)
+LIB_SUFFIX = $(LIB_SUFFIX_STATIC)
+LIB_FLAGS =
+LIBS =
+
+ifeq ($(MESA_FPE_CHECKS_ON),1)
+   FCbasic += $(FCtrapNANs) -fbounds-check -finit-derived -Wuninitialized -Warray-bounds
+   FCopt = -O0 -ftree-vectorize
+   SKIP_NAN_TRAPS = NO
+endif
+
+
+MODULE_DIR = ..
+MOD_PUBLIC_DIR = $(MODULE_DIR)/public
+MOD_PRIVATE_DIR = $(MODULE_DIR)/private
+MODULE_INCLUDES = -I$(MOD_PUBLIC_DIR) -I$(MOD_PRIVATE_DIR)
+OTHER_INCLUDES = -I$(MESA_DIR)/include $(HDF5_INCLUDE)
+INCLUDES = $(MODULE_INCLUDES) $(OTHER_INCLUDES)
+
+COMPILE_BASIC_FLAGS = $(FCbasic) $(FCopenmp) $(FCstatic) $(FCstandard) $(LIB_FLAGS) $(INCLUDES)
+COMPILE_BASIC = $(FC) $(COMPILE_BASIC_FLAGS)
+
+COMPILE_TO_TEST   = $(COMPILE_BASIC) $(FCwarn) $(FCimpno) $(FCchecks) $(FCopt) $(FCdebug) -c
+COMPILE_TO_DEPLOY = $(COMPILE_BASIC) $(FCwarn) $(FCimpno) $(FCopt) -c
+
+COMPILE_NO_OPENMP_NO_OPT = \
+   $(FC) $(FCbasic) $(INCLUDES) $(FCwarn) $(FCimpno) $(FCchecks) $(FCdebug) -c -O
+COMPILE_ASAP = \
+   $(FC) $(FCbasic) $(INCLUDES) $(FCwarn) $(FCimpno) $(FCdebug) -c -O
+
+COMPILE_FAST = $(COMPILE_BASIC) -c
+COMPILE_NO_CHECKS = $(COMPILE_BASIC) $(FCopt) -c
+COMPILE_NO_OPT    = $(COMPILE_BASIC) $(FCwarn) $(FCimpno) $(FCchecks) $(FCdebug) -c -O
+COMPILE_DEVEL     = $(COMPILE_NO_OPT)
+
+
+WORK_COMPILE = \
+   $(FC) $(FCbasic) $(FCopenmp) $(FCchecks) $(FCdebug) $(FCfree) $(FCstandard) \
+   -I$(MESA_INCLUDE_DIR) -I$(WORK_SRC_DIR) -c
+
+ifeq ($(USE_PGPLOT),YES)
+	WORK_COMPILE += -DUSE_PGPLOT
+endif
+
+TEST_DIR = ..
+TEST_SRC_DIR = $(TEST_DIR)/src
+PACKAGE_DIR = ../..
+LOCAL_LIB_DIR = $(PACKAGE_DIR)/make
+MESA_LIB_DIR = $(MESA_DIR)/lib
+MESA_INCLUDE_DIR = $(MESA_DIR)/include
+TEST_INCLUDES = -I$(LOCAL_LIB_DIR) -I$(PACKAGE_DIR)/public -I$(MESA_INCLUDE_DIR)
+TEST_COMPILE_FLAGS = $(FCbasic) $(FCopenmp) $(TEST_INCLUDES) $(FCchecks) $(FCdebug) $(LIB_FLAGS) -c
+TEST_COMPILE = $(FC) $(TEST_COMPILE_FLAGS) $(LD_FLAGS)
+
+# Library lists / linking commands
+
+LIBS_MATRIX = mtx const math utils
+LOAD_MATRIX_INT = $(addprefix -l,$(LIBS_MATRIX))
+LOAD_MATRIX_EXT = $(LOAD_CRMATH) $(LOAD_LAPACK95) $(LOAD_LAPACK) $(LOAD_BLAS)
+LOAD_MATRIX = $(LOAD_MATRIX_INT) $(LOAD_MATRIX_EXT)
+
+LIBS_MESA_NUMERICS = interp_2d interp_1d num auto_diff forum $(LIBS_MATRIX)
+LOAD_MESA_NUMERICS_INT = $(addprefix -l,$(LIBS_MESA_NUMERICS))
+LOAD_MESA_NUMERICS_EXT = $(LOAD_MATRIX_EXT) $(LOAD_HDF5)
+LOAD_MESA_NUMERICS = $(LOAD_MESA_NUMERICS_INT) $(LOAD_MESA_NUMERICS_EXT)
+
+LIBS_MESA_MICRO = star_data net eos kap rates neu chem $(LIBS_MESA_NUMERICS)
+LOAD_MESA_MICRO_INT = $(addprefix -l,$(LIBS_MESA_MICRO))
+LOAD_MESA_MICRO_EXT = $(LOAD_MESA_NUMERICS_EXT)
+LOAD_MESA_MICRO = $(LOAD_MESA_MICRO_INT) $(LOAD_MESA_MICRO_EXT)
+
+LIBS_MESA_MACRO = ionization atm colors turb $(LIBS_MESA_MICRO)
+LOAD_MESA_MACRO_INT = $(addprefix -l,$(LIBS_MESA_MACRO))
+LOAD_MESA_MACRO_EXT = $(LOAD_MESA_MICRO_EXT)
+LOAD_MESA_MACRO = $(LOAD_MESA_MACRO_INT) $(LOAD_MESA_MACRO_EXT)
+
+LIBS_MESA_STAR_SUPPORT = $(LIBS_GYRE) $(LIBS_MESA_MACRO)
+LOAD_MESA_STAR_SUPPORT_INT = $(addprefix -l,$(LIBS_MESA_STAR_SUPPORT))
+LOAD_MESA_STAR_SUPPORT_EXT = $(LOAD_MESA_MACRO_EXT) $(LD_FLAGS)
+LOAD_MESA_STAR_SUPPORT = $(LOAD_MESA_STAR_SUPPORT_INT) $(LOAD_MESA_STAR_SUPPORT_EXT)
+
+LIBS_STAR_MODS = star $(LIBS_MESA_STAR_SUPPORT)
+LOAD_STAR_MODS_INT = $(addprefix -l,$(LIBS_STAR_MODS))
+LOAD_STAR_MODS_EXT = $(LOAD_MESA_STAR_SUPPORT_EXT)
+LOAD_STAR_MODS = $(LOAD_STAR_MODS_INT) $(LOAD_STAR_MODS_EXT)
+
+LIBS_MESA_STAR = $(LIBS_STAR_MODS)
+LOAD_MESA_STAR_INT = -L$(MESA_LIB_DIR) $(addprefix -l,$(LIBS_MESA_STAR))
+ifeq ($(USE_PGSTAR),YES)
+   LOAD_MESA_STAR_EXT = $(LOAD_STAR_MODS_EXT) $(LOAD_PGPLOT)
+else
+   LOAD_MESA_STAR_EXT = $(LOAD_STAR_MODS_EXT)
+endif
+LOAD_MESA_STAR = $(LOAD_MESA_STAR_INT) $(LOAD_MESA_STAR_EXT)
+
+LIBS_MESA_BINARY = binary $(LIBS_MESA_STAR)
+LOAD_MESA_BINARY_INT = -L$(MESA_LIB_DIR) $(addprefix -l,$(LIBS_MESA_BINARY))
+
+ifeq ($(USE_GYRE),YES)
+   LIBS_GYRE = gyre_mesa gyre
+else
+   LIBS_GYRE = gyre_mesa
+endif
+LOAD_GYRE = -L$(MESA_LIB_DIR) $(addprefix -l,$(LIBS_GYRE))
+
+ifeq ($(USE_PGSTAR),YES)
+   LOAD_MESA_BINARY_EXT = $(LOAD_STAR_MODS_EXT) $(LOAD_PGPLOT)
+else
+   LOAD_MESA_BINARY_EXT = $(LOAD_STAR_MODS_EXT)
+endif
+LOAD_MESA_BINARY = $(LOAD_MESA_BINARY_INT) $(LOAD_MESA_BINARY_EXT)
+
+SLOW_COMPILE = -fno-var-tracking
+
+# gfortran 16.1 (MSYS2) produces wrong results for star/private/star_bcyclic.f90 (the block
+# tridiagonal solver of mesa/star) at -O1 and -O2: the very first Newton iteration diverges
+# ("correction rejected by sizeB", "abs(dlogT) > hydro_mtx_max_allowed_abs_dlogT"), even when
+# starting from a ZAMS model. Found by bisection over all star objects; -Og (and -O0) work.
+star_bcyclic.o : FCopt = -Og
+
+# LOADER creates executables. libgfortran is linked statically together with the
+# setlocale() wrapper from utils/windows/mesa_win_locale.c, which fixes number parsing
+# in multithreaded Fortran I/O under non-English Windows locales (and makes Fortran I/O
+# faster). libgomp and libwinpthread stay dynamic (a fully -static build is ~2.5x slower
+# in I/O): star.exe needs libgomp-1.dll and libwinpthread-1.dll from $(MESA_WIN_TOOLCHAIN)/bin.
+WIN_LOCALE_FIX = $(MESA_DIR)/lib/mesa_win_locale.o -Wl,--wrap=__imp_setlocale
+# The default Windows main-thread stack (2 MB) is far too small for MESA
+# (Linux: 8 MB or "ulimit -s unlimited"); reserve 1 GB (committed only when used).
+# Worker threads of OpenMP use OMP_STACKSIZE (set in mesa_env.ps1).
+WIN_STACK = -Wl,--stack,1073741824
+LOADER = $(FC) -static-libgfortran -static-libquadmath -static-libgcc $(WIN_STACK) $(WIN_LOCALE_FIX)
+
+STAR_WORK_OBJS = \
+   run_star_extras.o run_star.o
+
+BINARY_WORK_OBJS = \
+   run_star_extras.o run_binary_extras.o run_binary.o
+
+BUILD_ON_WINDOWS = YES
+
+.PHONY: all clean install install_lib install_mod
+
+# Helper scripts (PowerShell 7) replacing the bash/C tools of the MESA SDK
+MESA_WIN_TOOLS = $(MESA_DIR)/utils/windows
+PWSH_RUN = pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File
+
+CP_IF_NEWER = $(PWSH_RUN) $(MESA_WIN_TOOLS)/cp_if_newer.ps1
+CHECK_SDK_VERSION = echo passed
+MAKEDEPF90 = $(PWSH_RUN) $(MESA_WIN_TOOLS)/makedepf90.ps1

@@ -1,0 +1,25 @@
+# Makefile for the forum library (GYRE's "Fortran Utility Modules") on Windows.
+# The .fypp sources are preprocessed to .f90 by install_mesa.ps1 (fypp) first.
+
+include $(MESA_DIR)/utils/makefile_header
+
+SRCS = cinter_m.f90 const_m.f90 forum_m.f90 hdf5io_m.f90 kinds_m.f90 \
+   memory_m.f90 order_m.f90 string_m.f90 system_m.f90 version_m.f90
+
+OBJS = $(SRCS:.f90=.o)
+
+FORUM_FFLAGS = -std=f2018 -finit-real=snan -fbacktrace -fmax-errors=25 -O2 \
+   -fopenmp -ffp-contract=off $(HDF5_INCLUDE)
+
+libforum.a : $(OBJS)
+	$(LIB_TOOL) $@ $(OBJS)
+
+%.o : %.f90
+	$(FC) $(FORUM_FFLAGS) -c $<
+
+%.o : %.mod
+
+.depend :
+	$(MAKEDEPF90) $(SRCS) > .depend
+
+-include .depend

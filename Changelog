@@ -1,4 +1,12 @@
-2023-10-30: Jeżeli pojawi się błąd: 
+2026-10-07: Instrukcja instalacji MESA dla wszystkich konfiguracji (pracownia, Linux, macOS,
+Windows WSL, Windows natywnie): doc/MESA_instrukcja.tex i .pdf. Natywna instalacja pod Windows
+(PowerShell 7, MSYS2/gfortran, bez WSL): katalog windows/ oraz skrypty mk.ps1, rn.ps1, re.ps1,
+clean.ps1. Dodano .gitattributes (końce linii LF) i .gitignore. README -> README.md.
+
+
+
+
+2023-10-30: Jeżeli pojawi się błąd:
  
 At line 3126 of file ../private/pgstar_ctrls_io.f90 
 Fortran runtime error: Cannot match namelist object name read_extra_pgstar_inlist1 
