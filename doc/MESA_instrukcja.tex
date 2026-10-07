@@ -45,6 +45,11 @@
   basicstyle=\ttfamily\small, columns=fullflexible, keepspaces=true, upquote=true,
   showstringspaces=false, breaklines=false, frame=leftline, framerule=1.5pt,
   rulecolor=\color{coderule}, xleftmargin=8pt, framesep=6pt, aboveskip=0.6em, belowskip=0.6em}
+% szeroki blok (wysuniety na marginesy) dla dlugich polecen jednolinijkowych
+\lstdefinestyle{cmdwide}{style=cmd, basicstyle=\ttfamily\footnotesize,
+  xleftmargin=-14mm, xrightmargin=-14mm}
+\lstnewenvironment{shw}{\lstset{style=cmdwide}}{}
+\lstnewenvironment{psw}{\lstset{style=cmdwide}}{}
 \lstnewenvironment{sh}{\lstset{style=cmd}}{}   % bash / zsh
 \lstnewenvironment{ps}{\lstset{style=cmd}}{}   % PowerShell 7
 \lstnewenvironment{out}{\lstset{style=out}}{}  % wydruk, zawartosc plikow
@@ -141,13 +146,12 @@ Aktualizacja i sprawdzenie: 18 października 2025 (MESA SDK 24.7.1, MESA 24.08.1
 \begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
 \item Pobieramy MESA SDK (24.7.1, ok.~209~MB, ok.~8~min) i MESA (24.08.1, ok.~2~GB, ok.~18~min).
   Serwer SDK odrzuca pobieranie z konsoli, dlatego \code{wget} „udaje” przeglądarkę Firefox:
-\begin{sh}
+\begin{shw}
 mkdir ~/MESA
 cd ~/MESA
-SDK=http://user.astro.wisc.edu/~townsend/resource/download/mesasdk
-wget -U firefox $SDK/mesasdk-x86_64-linux-24.7.1.tar.gz
+wget -U firefox http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/mesasdk-x86_64-linux-24.7.1.tar.gz
 wget https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
-\end{sh}
+\end{shw}
 \item Rozpakowujemy SDK i ustawiamy zmienne (bash):
 \begin{sh}
 tar xvfz mesasdk-x86_64-linux-24.7.1.tar.gz -C ~/MESA/
@@ -362,14 +366,14 @@ $PSVersionTable.PSVersion
 winget install --id MSYS2.MSYS2 -e
 \end{ps}
   Aktualizacja bazy pakietów (dwukrotnie) i instalacja gfortran, \code{make} oraz HDF5:
-\begin{ps}
-$pac = 'C:\msys64\usr\bin\pacman.exe'
-& $pac -Syu --noconfirm
-& $pac -Syu --noconfirm
-$pkgs = 'gcc-fortran', 'make', 'hdf5' | ForEach-Object { "mingw-w64-ucrt-x86_64-$_" }
-& $pac -S --needed --noconfirm $pkgs
+\begin{psw}
+C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
+C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
+C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-gcc-fortran
+C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-make
+C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-hdf5
 C:\msys64\ucrt64\bin\gfortran.exe --version
-\end{ps}
+\end{psw}
   Procedurę sprawdzono z gfortran \textbf{16.1.0}. Inna wersja kompilatora może wymagać zmian
   (dodatek~\ref{app:win}, punkt~5).
 \item \textbf{Python 3} (potrzebny tylko podczas instalacji MESA):
@@ -402,10 +406,8 @@ zignorować.
 
 Repozytorium z przykładem i skryptami pobieramy jako archiwum zip (nie wymaga programu Git):
 \begin{ps}
-cd C:\MESA
-$gh = 'https://github.com/VA00/MESA-minimal-test-1MSun-star'
-curl.exe -L -o example.zip "$gh/archive/refs/heads/main.zip"
-tar -xf example.zip
+curl.exe -L -O https://github.com/VA00/MESA-minimal-test-1MSun-star/archive/main.zip
+tar -xf main.zip
 Rename-Item MESA-minimal-test-1MSun-star-main MESA-minimal-test-1MSun-star
 \end{ps}
 Z zainstalowanym Gitem (\verb!winget install --id Git.Git -e!) zamiast tego wystarczy:
@@ -658,7 +660,8 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 Get-ChildItem C:\MESA\MESA-minimal-test-1MSun-star -Recurse | Unblock-File
 \end{ps}
 \item[\code{pacman}: błędy pobierania pakietów (404, \code{failed retrieving file})]
-  Nieaktualna baza pakietów: \verb!& $pac -Syu --noconfirm! i ponowna instalacja.
+  Nieaktualna baza pakietów: \verb!C:\msys64\usr\bin\pacman.exe -Syu --noconfirm! i ponowna
+  instalacja.
 \item[\code{tar}: \code{Error opening archive} przy pliku \code{.zip}]
   Przed systemowym \code{tar} w \code{PATH} jest GNU tar (z Git lub MSYS2). Pełna ścieżka:
   \verb!C:\Windows\System32\tar.exe -xf mesa-24.08.1.zip!.
