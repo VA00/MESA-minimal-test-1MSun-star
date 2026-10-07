@@ -321,9 +321,10 @@ C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-gcc-f
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-make
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-hdf5
 \end{psw}
-\item Python, a potem \textbf{nowe okno} PowerShell~7:
+\item Python i Git, a potem \textbf{nowe okno} PowerShell~7:
 \begin{ps}
 winget install --id Python.Python.3.14 -e
+winget install --id Git.Git -e
 \end{ps}
 \item Pobranie i rozpakowanie MESA (komunikaty \verb!Can't create ...! można zignorować):
 \begin{ps}
@@ -338,9 +339,7 @@ curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
 \end{ps}
 \item Pobranie przykładu:
 \begin{ps}
-curl.exe -L -O https://github.com/VA00/MESA-minimal-test-1MSun-star/archive/main.zip
-tar -xf main.zip
-Rename-Item MESA-minimal-test-1MSun-star-main MESA-minimal-test-1MSun-star
+git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
 \end{ps}
 \item Zmienne środowiskowe, \textbf{w każdym nowym oknie} PowerShell:
 \begin{ps}
@@ -556,10 +555,8 @@ $10^{-5}$) i \code{net} (jedna linia, różnica $5\cdot10^{-7}$).
   W tym oknie nie wykonano \verb!. ...\windows\mesa_env.ps1! (z kropką na początku). MSYS2 w~innym
   miejscu niż \verb!C:\msys64!: parametr \verb!-Toolchain D:/msys64/ucrt64!.
 \item[Skrypty są blokowane („running scripts is disabled on this system”)]
-  Zezwalamy na lokalne skrypty i zdejmujemy znacznik „pobrane z Internetu”:
 \begin{ps}
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-Get-ChildItem C:\MESA\MESA-minimal-test-1MSun-star -Recurse | Unblock-File
 \end{ps}
 \item[\code{pacman}: błędy pobierania pakietów (404, \code{failed retrieving file})]
   Nieaktualna baza pakietów: \verb!C:\msys64\usr\bin\pacman.exe -Syu --noconfirm! i ponowna
