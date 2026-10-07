@@ -387,13 +387,15 @@ winget install --id Python.Python.3.14 -e
 \begin{ps}
 mkdir C:\MESA
 cd C:\MESA
-$url = 'https://zenodo.org/records/13353788/files/mesa-24.08.1.zip'
-curl.exe -L -o mesa-24.08.1.zip $url
+curl.exe -L -O https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
 \end{ps}
 W sieci OA zamiast Zenodo można użyć lokalnego repozytorium:
 \begin{ps}
-curl.exe -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
+curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
 \end{ps}
+Opcja \code{-O} zapisuje plik pod nazwą z adresu (\code{mesa-24.08.1.zip}), a \code{-L} każe
+podążać za ewentualnymi przekierowaniami serwera. Pełna nazwa \code{curl.exe} jest celowa:
+w starym Windows PowerShell 5.1 \code{curl} to alias zupełnie innego polecenia.
 Rozpakowanie (wbudowanym w Windows programem \code{tar}, który obsługuje pliki zip):
 \begin{ps}
 tar -xf mesa-24.08.1.zip
