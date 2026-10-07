@@ -538,13 +538,13 @@ $10^{-5}$) i \code{net} (jedna linia, różnica $5\cdot10^{-7}$).
   \code{ulimit -s unlimited}). \code{star.exe} jest linkowany z rezerwacją 1~GB
   (\verb!-Wl,--stack,1073741824!), a~wątkom OpenMP \code{mesa\_env.ps1} ustawia
   \code{OMP\_STACKSIZE=512M}.
-\item \textbf{Błąd optymalizacji gfortrana 16.1.} Plik \verb!star\private\star_bcyclic.f90!
-  (blokowo-trójdiagonalny solver równań budowy gwiazdy, z dołączanym \code{mtx\_solve\_routines.inc})
-  skompilowany z \code{-O1}/\code{-O2} daje błędne wyniki: już pierwsza iteracja Newtona jest
-  rozbieżna, nawet przy starcie z modelu ZAMS. Plik wskazała bisekcja po 159 obiektach modułu
-  \code{star}. Jest kompilowany z \code{-Og} (poziom optymalizacji „pod debugowanie”, między
-  \code{-O0} a~\code{-O1}), reszta MESA z~\code{-O2}. Przyczyna (błąd GCC czy niezdefiniowane
-  zachowanie w~kodzie) nie jest jeszcze ustalona.
+\item \textbf{Błąd w MESA ujawniany przez gfortran $\geq$ 15.} W \verb!mtx\public\mtx_solve_routines.inc!
+  (dołączanym do solvera \verb!star\private\star_bcyclic.f90!) pętle zamiany elementów według
+  pivotów mają dyrektywę \verb+!$omp simd+, choć ich iteracje nie są niezależne. To niezdefiniowane
+  zachowanie: z nowymi kompilatorami już pierwsza iteracja Newtona jest rozbieżna (\code{sizeB}),
+  nawet przy starcie z modelu ZAMS. Błąd jest znany autorom (lista mesa-users, marzec 2026, MESA SDK
+  26.3.1 z gfortran 15.2) i poprawiony w repozytorium MESA (commit \code{03ef2a5}, luty 2026).
+  \code{install\_mesa.ps1} nakłada tę poprawkę (usuwa trzy linie) przed kompilacją.
 \item \textbf{Drobiazgi.} W \verb!chem\make\makefile_base! usunięto \verb!-m %m.mod! (\code{cmd.exe}
   traktuje \verb!%m! jak zmienną). Dowiązanie \code{pgstar.f90} zastępuje kopia
   \code{pgstar\_stub.f90}. \code{star.exe} potrzebuje \code{libgomp-1.dll}
@@ -574,13 +574,12 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
   → Aplikacje → Zaawansowane ustawienia aplikacji → Aliasy wykonywania aplikacji}.
 \item[Rozbieżność już w pierwszym kroku (\code{correction rejected by sizeB})]
   Kończy się komunikatem \code{dt < min\_timestep\_limit}. Objaw błędu z punktu~5, np.~gdy MESA
-  była skompilowana ze starszą wersją skryptów.
-  Przebuduj moduł \code{star} i katalog roboczy:
-\begin{ps}
-C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1 -Modules star -Clean
+  była skompilowana bez poprawki. Przebuduj moduły i katalog roboczy:
+\begin{psw}
+C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1 -Modules mtx,net,star -Clean
 ./clean
 ./mk
-\end{ps}
+\end{psw}
 \item[\code{bad header info in ...eosFreeEOS\_data...}]
   Objaw błędu z punktu~3. Usuń pliki cache zapisane przez wadliwy program i zbuduj \code{star.exe}
   ponownie (\verb!./clean!, \verb!./mk!):

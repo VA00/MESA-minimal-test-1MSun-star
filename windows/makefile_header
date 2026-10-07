@@ -228,12 +228,6 @@ LOAD_MESA_BINARY = $(LOAD_MESA_BINARY_INT) $(LOAD_MESA_BINARY_EXT)
 
 SLOW_COMPILE = -fno-var-tracking
 
-# gfortran 16.1 (MSYS2) produces wrong results for star/private/star_bcyclic.f90 (the block
-# tridiagonal solver of mesa/star) at -O1 and -O2: the very first Newton iteration diverges
-# ("correction rejected by sizeB", "abs(dlogT) > hydro_mtx_max_allowed_abs_dlogT"), even when
-# starting from a ZAMS model. Found by bisection over all star objects; -Og (and -O0) work.
-star_bcyclic.o : FCopt = -Og
-
 # LOADER creates executables. libgfortran is linked statically together with the
 # setlocale() wrapper from utils/windows/mesa_win_locale.c, which fixes number parsing
 # in multithreaded Fortran I/O under non-English Windows locales (and makes Fortran I/O

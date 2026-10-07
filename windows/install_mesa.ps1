@@ -139,6 +139,17 @@ if ($c -notmatch 'MESA_WINDOWS_PATCH') {
     Set-Content -NoNewline -Path $cfile -Value $c
 }
 
+# Upstream fix (MESAHub/mesa commit 03ef2a5, Feb 2026, "mtx: fix undefined behaviour in `b` pivot
+# swaps"): "!$omp simd" on the pivot-swap loops of my_getrs1* is undefined behaviour; gfortran >= 15
+# then produces wrong solutions in star_bcyclic.f90 and net_burn_support.f90 (solver fails: "sizeB").
+$incFile = "$MesaDir/mtx/public/mtx_solve_routines.inc"
+$inc = Get-Content -Raw $incFile
+$incFixed = [regex]::Replace($inc, '(?m)^[ \t]*!\$omp simd private\(temp\)\r?\n(?=[ \t]*do i = 1,n\r?\n[ \t]*temp = b\(i\))', '')
+if ($incFixed -ne $inc) {
+    Write-Step 'Patching mtx/public/mtx_solve_routines.inc (upstream fix 03ef2a5)'
+    Set-Content -NoNewline -Path $incFile -Value $incFixed
+}
+
 # "%m" in a recipe is mangled by cmd.exe batch files; the flag is irrelevant for makedepf90.ps1
 $chemMk = "$MesaDir/chem/make/makefile_base"
 $t = Get-Content -Raw $chemMk
