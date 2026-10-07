@@ -96,14 +96,15 @@ benchmarków (\ref{sec:bench}).
 
 \begin{itemize}
   \item Dysk: pełna instalacja MESA to ok.~21~GB, MESA SDK ok.~0,7~GB.
-  \item Pamięć: minimum teoretyczne 8~GB RAM, w praktyce nieco więcej.
+  \item Pamięć: minimum teoretycznie 8~GB RAM. W praktyce na pracowni na komputerach z 8GB obliczenia zajmujące 
+  7.6 GB zawieszają się. 
   \item Ścieżki do katalogów z MESA \textbf{nie mogą zawierać spacji}.
 \end{itemize}
 
 % =====================================================================
 \section{Pracownia komputerowa Fort OA}\label{sec:pracownia}
 
-MESA jest zainstalowana systemowo w~\verb!/opt/MESA!. Wystarczającą ilość pamięci mają w~tej
+MESA jest zainstalowana systemowo w~\verb!/opt/MESA!. Wystarczającą ilość pamięci powyżej 8~GB mają w~tej
 chwili komputery: Cep, Aqr, Eri, Sgr, Hya.
 
 \begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
@@ -136,6 +137,10 @@ cd MESA-minimal-test-1MSun-star
 \begin{uwaga}[Znany problem]
 Na komputerach pracowni obliczenia zawieszały się przy kroku 10\,703 (okolice błysku helowego).
 \end{uwaga}
+
+\begin{info}[Zadanie]
+Proszę powtórzyć testowy run w katalogach \verb!/data/rok4! oraz \verb!$HOME! i podać konkretne wartości czasu obliczeń. 
+\end{info}
 
 % =====================================================================
 \section{Linux (Ubuntu) -- instalacja na własnym komputerze}\label{sec:linux}
@@ -266,7 +271,7 @@ cd MESA-minimal-test-1MSun-star
   Czas obliczeń: 135~min przy \code{OMP\_NUM\_THREADS=8} na procesorze M3 Max.
 \end{enumerate}
 
-\begin{info}[Do zbadania]
+\begin{info}[Zadanie]
 Nowoczesne procesory (Apple M3, M4, ale też np.~Intel i9 285) mają rdzenie typu
 „performance” (szybkie, gorące) i~„efficiency” (wolniejsze, chłodniejsze). W Linuksie można
 przypisać symulację do wybranych rdzeni poleceniem \code{taskset}. Jak zrobić to w macOS?
@@ -307,7 +312,7 @@ sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget
 Wersja natywna nie wyświetla wykresów (pgstar). Wszystkie polecenia wpisujemy w~PowerShell~7.
 
 \begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
-\item PowerShell~7:
+\item Instalujemy PowerShell~7:
 \begin{ps}
 winget install --id Microsoft.PowerShell -e
 \end{ps}
