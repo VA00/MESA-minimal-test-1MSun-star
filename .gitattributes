@@ -1,0 +1,5 @@
+# Unix line endings everywhere: the bash scripts (mk, rn, re, ...) must stay LF
+# for Linux, macOS and WSL, also when committed from Windows (core.autocrlf=true).
+* text=auto eol=lf
+*.pdf binary
+*.png binary
