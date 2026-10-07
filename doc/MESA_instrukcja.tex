@@ -181,7 +181,7 @@ export MESA_DIR=~/MESA/mesa-24.08.1
 export OMP_NUM_THREADS=4
 \end{sh}
 \item Opcjonalnie, żeby zmienne ustawiały się przy każdym uruchomieniu terminala, dopisujemy je do
-  \verb!~/.bashrc! (apostrofy są celowe: \verb!$MESASDK_ROOT! ma zostać zapisane dosłownie):
+  \verb!~/.bashrc!:
 \begin{sh}
 echo 'export MESASDK_ROOT=~/MESA/mesasdk' >> ~/.bashrc
 echo 'source $MESASDK_ROOT/bin/mesasdk_init.sh' >> ~/.bashrc
@@ -310,8 +310,8 @@ sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget
 
 \begin{uwaga}[Pracuj w katalogu domowym Linuksa]
 MESA i katalogi robocze umieszczamy w \verb!~! (np.~\verb!~/MESA!), \textbf{nie} na dysku Windows
-widocznym jako \verb!/mnt/c!. Dostęp do plików Windows z WSL jest wielokrotnie wolniejszy (podobnie
-jak sieciowy katalog \verb!/home! na pracowni). Plik pobrany w Windows kopiujemy do Linuksa:
+widocznym jako \verb!/mnt/c! (tam obliczenia są wielokrotnie wolniejsze). Plik pobrany w Windows
+kopiujemy do Linuksa:
 \begin{sh}
 cp /mnt/c/Users/<nazwa>/Downloads/mesa-24.08.1.zip ~/MESA/
 \end{sh}
@@ -361,8 +361,7 @@ $PSVersionTable.PSVersion
 \begin{ps}
 winget install --id MSYS2.MSYS2 -e
 \end{ps}
-  Aktualizacja bazy pakietów (dwukrotnie, za pierwszym razem MSYS2 może zaktualizować tylko pakiety
-  podstawowe) i instalacja gfortran, \code{make} oraz HDF5 z interfejsem Fortran:
+  Aktualizacja bazy pakietów (dwukrotnie) i instalacja gfortran, \code{make} oraz HDF5:
 \begin{ps}
 $pac = 'C:\msys64\usr\bin\pacman.exe'
 & $pac -Syu --noconfirm
@@ -377,9 +376,7 @@ C:\msys64\ucrt64\bin\gfortran.exe --version
 \begin{ps}
 winget install --id Python.Python.3.14 -e
 \end{ps}
-  W \textbf{nowym oknie} PowerShell sprawdzamy \verb!py -3 --version!. Instalator dodaje zwykle tylko
-  program \code{py}, a nie polecenie \code{python}. To wystarczy, bo skrypt instalacyjny sam szuka
-  kolejno \code{python} i~\code{py -3}.
+  W \textbf{nowym oknie} PowerShell sprawdzamy \verb!py -3 --version!.
 \end{enumerate}
 
 \subsection{Pobranie MESA i repozytorium}
@@ -393,18 +390,14 @@ W sieci OA zamiast Zenodo można użyć lokalnego repozytorium:
 \begin{ps}
 curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
 \end{ps}
-Opcja \code{-O} zapisuje plik pod nazwą z adresu (\code{mesa-24.08.1.zip}), a \code{-L} każe
-podążać za ewentualnymi przekierowaniami serwera. Pełna nazwa \code{curl.exe} jest celowa:
-w starym Windows PowerShell 5.1 \code{curl} to alias zupełnie innego polecenia.
-Rozpakowanie (wbudowanym w Windows programem \code{tar}, który obsługuje pliki zip):
+Rozpakowanie:
 \begin{ps}
 tar -xf mesa-24.08.1.zip
 \end{ps}
 
 \begin{info}[To nie jest błąd]
-\code{tar} wypisze kilkadziesiąt komunikatów \verb!Can't create '...': Invalid argument! dla
-plików w~\code{docs/} i jednego w~\code{star/test\_suite}. To dowiązania symboliczne, których
-Windows bez uprawnień administratora nie tworzy. Do obliczeń nie są potrzebne.
+\code{tar} wypisze kilkadziesiąt komunikatów \verb!Can't create '...': Invalid argument!. Można je
+zignorować.
 \end{info}
 
 Repozytorium z przykładem i skryptami pobieramy jako archiwum zip (nie wymaga programu Git):
@@ -441,10 +434,9 @@ MESA_DIR        = C:/MESA/mesa-24.08.1
 OMP_NUM_THREADS = 12
 toolchain       = C:\msys64\ucrt64\bin
 \end{out}
-Kropka i spacja na początku są konieczne (\emph{dot-sourcing}), inaczej zmienne znikną po
-zakończeniu skryptu. Skrypt znajduje MESA w katalogu obok repozytorium, a inne położenie podajemy
-parametrem \code{-MesaDir}. Liczbę wątków (domyślnie liczba rdzeni) zmienia parametr
-\code{-Threads 4} lub polecenie \verb!$env:OMP_NUM_THREADS = 4!.
+Kropka i spacja na początku są konieczne. Inne położenie MESA podajemy parametrem
+\code{-MesaDir}, liczbę wątków parametrem \code{-Threads 4} lub poleceniem
+\verb!$env:OMP_NUM_THREADS = 4!.
 
 Instalacja (odpowiednik \code{./install}, na 12 rdzeniach ok.~4,5~min):
 \begin{ps}
@@ -455,18 +447,13 @@ C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1
 MESA installation was successful (2.5 min)
 ************************************************
 \end{out}
-Skrypt sprawdza narzędzia, podmienia \verb!utils\makefile_header! na wersję dla Windows (oryginał
-zostaje jako \code{makefile\_header.orig}), łata jeden plik C, rozpakowuje dane do \verb!data\!
-i kompiluje moduły MESA aż do \code{star}. Można go bezpiecznie uruchomić ponownie. Opcja
-\code{-Modules star -Clean} przebudowuje tylko wybrane moduły.
+Skrypt można bezpiecznie uruchomić ponownie.
 
-\textbf{Testy modułów (opcjonalnie).} Kilkanaście minut. Wyniki są porównywane z wzorcami z~Linuksa
-z tolerancją $10^{-8}$:
+\textbf{Testy modułów (opcjonalnie, kilkanaście minut):}
 \begin{ps}
 C:\MESA\MESA-minimal-test-1MSun-star\windows\test_mesa.ps1
 \end{ps}
-Oczekiwany wynik: \code{OK} wszędzie oprócz \code{num} (całkowanie sztywnych równań różniczkowych
-wzmacnia różnice zaokrągleń do $10^{-5}$) i \code{net} (jedna linia, różnica $5\cdot10^{-7}$).
+Oczekiwany wynik: \code{OK} wszędzie oprócz \code{num} i \code{net} (drobne różnice numeryczne).
 
 \subsection{Uruchomienie}
 
