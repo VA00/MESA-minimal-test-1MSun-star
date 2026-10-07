@@ -96,8 +96,7 @@ benchmarków (\ref{sec:bench}).
 
 \begin{itemize}
   \item Dysk: pełna instalacja MESA to ok.~21~GB, MESA SDK ok.~0,7~GB.
-  \item Pamięć: minimum teoretyczne 8~GB RAM, w praktyce nieco więcej. Pod Windows (wersja natywna,
-        12~wątków) proces zajmował podczas całej ewolucji ok.~7,3~GB. Zalecane 16~GB.
+  \item Pamięć: minimum teoretyczne 8~GB RAM, w praktyce nieco więcej.
   \item Ścieżki do katalogów z MESA \textbf{nie mogą zawierać spacji}.
 \end{itemize}
 
@@ -172,10 +171,6 @@ mesasdk_init.sh: missing prerequisites:
   Doinstalowujemy je i powtarzamy krok~2 (\code{source ...}):
 \begin{sh}
 sudo apt install tcsh zlib1g-dev libx11-dev
-\end{sh}
-  Na systemach z minimalną instalacją (serwery, WSL) przydadzą się też:
-\begin{sh}
-sudo apt install binutils make perl unzip wget
 \end{sh}
 \item Rozpakowujemy MESA i ustawiamy kolejne zmienne (liczba wątków według liczby rdzeni):
 \begin{sh}
@@ -280,192 +275,89 @@ przypisać symulację do wybranych rdzeni poleceniem \code{taskset}. Jak zrobić
 % =====================================================================
 \section{Windows -- WSL (zalecane)}\label{sec:wsl}
 
-WSL (\emph{Windows Subsystem for Linux}) uruchamia prawdziwego Linuksa (Ubuntu) wewnątrz Windows.
-MESA działa w nim dokładnie tak jak w rozdziale~\ref{sec:linux}, łącznie z oknami wykresów.
-\dosprawdzenia{rozdział przygotowany na podstawie dokumentacji WSL, na komputerze testowym nie było
-WSL; wpisy WSL2 w tabeli benchmarków potwierdzają, że MESA w WSL działa}
+\dosprawdzenia{rozdział przygotowany na podstawie dokumentacji WSL, na komputerze testowym nie było WSL}
 
 \begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
-\item Instalacja WSL z Ubuntu. W PowerShell \textbf{uruchomionym jako administrator}:
+\item W PowerShell \textbf{uruchomionym jako administrator}, potem restart komputera:
 \begin{ps}
 wsl --install
 \end{ps}
-  Po ponownym uruchomieniu komputera otwiera się okno Ubuntu, w którym zakładamy linuksowego
-  użytkownika i hasło (hasło będzie potrzebne do \code{sudo}).
-\item \textbf{Pamięć.} Maszyna wirtualna WSL2 dostaje domyślnie tylko połowę pamięci RAM
-  komputera, a MESA potrzebuje ok.~8~GB. Na komputerze z 16~GB warto przydzielić więcej.
-  W PowerShell (zwykłym) tworzymy plik konfiguracyjny:
+  W oknie Ubuntu, które otworzy się po restarcie, zakładamy użytkownika i hasło.
+\item Pamięć dla WSL. W zwykłym PowerShell:
 \begin{ps}
 notepad $env:USERPROFILE\.wslconfig
 \end{ps}
-  o treści (np.~12~GB dla komputera z 16~GB RAM):
+  wpisujemy (np.~dla komputera z 16~GB RAM)
 \begin{out}
 [wsl2]
 memory=12GB
 \end{out}
-  i restartujemy WSL poleceniem \verb!wsl --shutdown!.
-\item Dalej postępujemy dokładnie według rozdziału~\ref{sec:linux}, w~oknie Ubuntu. Od razu
-  instalujemy komplet pakietów (Ubuntu w WSL to instalacja minimalna):
+  zapisujemy plik i wykonujemy \verb!wsl --shutdown!.
+\item W oknie Ubuntu:
 \begin{sh}
 sudo apt update
 sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget
 \end{sh}
+  i dalej według rozdziału~\ref{sec:linux}, w katalogu \verb!~/MESA! (\textbf{nie} w \verb!/mnt/c!).
 \end{enumerate}
-
-\begin{uwaga}[Pracuj w katalogu domowym Linuksa]
-MESA i katalogi robocze umieszczamy w \verb!~! (np.~\verb!~/MESA!), \textbf{nie} na dysku Windows
-widocznym jako \verb!/mnt/c! (tam obliczenia są wielokrotnie wolniejsze). Plik pobrany w Windows
-kopiujemy do Linuksa:
-\begin{sh}
-cp /mnt/c/Users/<nazwa>/Downloads/mesa-24.08.1.zip ~/MESA/
-\end{sh}
-\end{uwaga}
-
-\textbf{Wykresy.} W Windows~11 okna pgstar pojawiają się jak zwykłe okna Windows (WSLg), bez
-instalowania serwera X. \dosprawdzenia{Windows~10: WSLg wymaga aktualnego WSL ze Sklepu Microsoft}
-
-\textbf{Pliki wyników z poziomu Windows.} Polecenie \verb!explorer.exe .! w katalogu WSL otwiera
-go w Eksploratorze Windows (ścieżka typu \verb!\\wsl$\Ubuntu\home\<nazwa>\MESA!).
 
 % =====================================================================
 \section{Windows -- natywnie (PowerShell 7, bez WSL)}\label{sec:win}
 
-MESA jest kompilowana kompilatorem \textbf{gfortran z MinGW-w64} (MSYS2, środowisko UCRT64) do
-zwykłych programów Windows (\code{star.exe}). Nie są potrzebne WSL, bash ani MESA SDK. Skrypty
-zastępujące narzędzia SDK są w katalogu \code{windows} repozytorium. Wszystkie polecenia wpisujemy
-w~\textbf{PowerShell~7}.
-
-Sprawdzone 6--7~października 2026: Windows~11, AMD Ryzen~9 5900X, 32~GB RAM, gfortran 16.1.0.
-Kompilacja MESA trwała ok.~4,5~min, pełna ewolucja przykładu 70,8~min na 12~wątkach.
-
-\begin{uwaga}[Ograniczenia wersji natywnej]
-\begin{itemize}[leftmargin=1.2em]
-  \item \textbf{Brak wykresów pgstar} (MESA zbudowana bez PGPLOT): nie ma okien ani plików
-        \code{png/}, a \code{pgstar\_flag = .true.} jest ignorowane. Dane z \code{LOGS} można
-        rysować np.~w Pythonie.
-  \item Nie są budowane GYRE, ADIPLS ani moduły \code{binary} i~\code{astero}.
-  \item Wyniki nie są identyczne bit w bit z Linuksem (różnice na poziomie zaokrągleń).
-\end{itemize}
-\end{uwaga}
-
-\subsection{Oprogramowanie (jednorazowo)}
+Wersja natywna nie wyświetla wykresów (pgstar). Wszystkie polecenia wpisujemy w~PowerShell~7.
 
 \begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
-\item \textbf{PowerShell~7.} W systemie jest stary \emph{Windows PowerShell 5.1}, potrzebny jest
-  \emph{PowerShell~7} (program \code{pwsh}):
+\item PowerShell~7:
 \begin{ps}
 winget install --id Microsoft.PowerShell -e
 \end{ps}
-  Dalej wszystkie polecenia wpisujemy w oknie „PowerShell 7”. Sprawdzenie wersji
-  (\code{Major} musi wynosić co najmniej~7):
-\begin{ps}
-$PSVersionTable.PSVersion
-\end{ps}
-\item \textbf{MSYS2 z kompilatorem gfortran}, instalacja do \verb!C:\msys64!:
-\begin{ps}
-winget install --id MSYS2.MSYS2 -e
-\end{ps}
-  Aktualizacja bazy pakietów (dwukrotnie) i instalacja gfortran, \code{make} oraz HDF5:
+  Dalej pracujemy w oknie „PowerShell 7”.
+\item MSYS2 i kompilator gfortran:
 \begin{psw}
+winget install --id MSYS2.MSYS2 -e
 C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
 C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-gcc-fortran
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-make
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-hdf5
-C:\msys64\ucrt64\bin\gfortran.exe --version
 \end{psw}
-  Procedurę sprawdzono z gfortran \textbf{16.1.0}. Inna wersja kompilatora może wymagać zmian
-  (dodatek~\ref{app:win}, punkt~5).
-\item \textbf{Python 3} (potrzebny tylko podczas instalacji MESA):
+\item Python, a potem \textbf{nowe okno} PowerShell~7:
 \begin{ps}
 winget install --id Python.Python.3.14 -e
 \end{ps}
-  W \textbf{nowym oknie} PowerShell sprawdzamy \verb!py -3 --version!.
-\end{enumerate}
-
-\subsection{Pobranie MESA i repozytorium}
-
+\item Pobranie i rozpakowanie MESA (komunikaty \verb!Can't create ...! można zignorować):
 \begin{ps}
 mkdir C:\MESA
 cd C:\MESA
 curl.exe -L -O https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
+tar -xf mesa-24.08.1.zip
 \end{ps}
-W sieci OA zamiast Zenodo można użyć lokalnego repozytorium:
+  W sieci OA zamiast Zenodo:
 \begin{ps}
 curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
 \end{ps}
-Rozpakowanie:
-\begin{ps}
-tar -xf mesa-24.08.1.zip
-\end{ps}
-
-\begin{info}[To nie jest błąd]
-\code{tar} wypisze kilkadziesiąt komunikatów \verb!Can't create '...': Invalid argument!. Można je
-zignorować.
-\end{info}
-
-Repozytorium z przykładem i skryptami pobieramy jako archiwum zip (nie wymaga programu Git):
+\item Pobranie przykładu:
 \begin{ps}
 curl.exe -L -O https://github.com/VA00/MESA-minimal-test-1MSun-star/archive/main.zip
 tar -xf main.zip
 Rename-Item MESA-minimal-test-1MSun-star-main MESA-minimal-test-1MSun-star
 \end{ps}
-Z zainstalowanym Gitem (\verb!winget install --id Git.Git -e!) zamiast tego wystarczy:
-\begin{ps}
-git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
-\end{ps}
-
-Struktura katalogów:
-\begin{out}
-C:\MESA
-  mesa-24.08.1\                    <- MESA
-  MESA-minimal-test-1MSun-star\    <- przyklad (inlist, src, mk, rn, *.ps1, ...)
-    windows\                       <- skrypty instalacyjne dla Windows
-    doc\                           <- ta instrukcja
-\end{out}
-
-\subsection{Kompilacja MESA}
-
-W \textbf{każdym nowym oknie} PowerShell, w którym pracujemy z MESA, najpierw ustawiamy zmienne
-(odpowiednik \code{export MESA\_DIR=...} i \code{source mesasdk\_init.sh}):
+\item Zmienne środowiskowe, \textbf{w każdym nowym oknie} PowerShell:
 \begin{ps}
 . C:\MESA\MESA-minimal-test-1MSun-star\windows\mesa_env.ps1
 \end{ps}
-\begin{out}
-MESA_DIR        = C:/MESA/mesa-24.08.1
-OMP_NUM_THREADS = 12
-toolchain       = C:\msys64\ucrt64\bin
-\end{out}
-Kropka i spacja na początku są konieczne. Inne położenie MESA podajemy parametrem
-\code{-MesaDir}, liczbę wątków parametrem \code{-Threads 4} lub poleceniem
-\verb!$env:OMP_NUM_THREADS = 4!.
-
-Instalacja (odpowiednik \code{./install}, na 12 rdzeniach ok.~4,5~min):
+\item Kompilacja MESA (kilka minut, na końcu napis \code{MESA installation was successful}):
 \begin{ps}
 C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1
 \end{ps}
-\begin{out}
-************************************************
-MESA installation was successful (2.5 min)
-************************************************
-\end{out}
-Skrypt można bezpiecznie uruchomić ponownie.
-
-\textbf{Testy modułów (opcjonalnie, kilkanaście minut):}
-\begin{ps}
-C:\MESA\MESA-minimal-test-1MSun-star\windows\test_mesa.ps1
-\end{ps}
-Oczekiwany wynik: \code{OK} wszędzie oprócz \code{num} i \code{net} (drobne różnice numeryczne).
-
-\subsection{Uruchomienie}
-
+\item Kompilacja i uruchomienie przykładu:
 \begin{ps}
 cd C:\MESA\MESA-minimal-test-1MSun-star
 .\mk.ps1
 .\rn.ps1
 \end{ps}
-Dalej jak w rozdziale~\ref{sec:run}: zamiast \verb!./mk!, \verb!./rn!, \verb!./re! używamy
-\verb!.\mk.ps1!, \verb!.\rn.ps1!, \verb!.\re.ps1!.
+\end{enumerate}
+Dalej jak w rozdziale~\ref{sec:run}.
 
 % =====================================================================
 \section{Uruchomienie przykładu (wszystkie systemy)}\label{sec:run}
@@ -485,13 +377,11 @@ sprzątanie kompilacji & \verb!./clean! & \verb!.\clean.ps1! \\
 \bottomrule
 \end{tabular}
 \end{center}
-Obliczenia przerywamy kombinacją \code{Ctrl+C}. Zdjęcia do restartów są w katalogu \code{photos}
-(nazwa: \code{x} i trzy ostatnie cyfry numeru modelu).
+Obliczenia przerywamy kombinacją \code{Ctrl+C}. Zdjęcia do restartów są w katalogu \code{photos}.
 
 \subsection{Szybki test: 50 kroków od ciągu głównego}\label{sec:zams}
 
-Zanim uruchomimy pełną ewolucję, warto sprawdzić instalację krótkim testem. Po \verb!./mk! kopiujemy
-potrzebne pliki do osobnego katalogu i startujemy z gotowego modelu ZAMS:
+Po kompilacji (\verb!./mk!):
 \begin{sh}
 mkdir ../zams_test
 cp star inlist inlist.pgstar history_columns.list rn ../zams_test/
@@ -512,22 +402,16 @@ a w sekcji \code{\&controls} dopisujemy linijkę
 \begin{out}
   max_model_number = 50
 \end{out}
-Uruchamiamy (\verb!./rn! lub \verb!.\rn.ps1!). Poprawna instalacja kończy się po 50 krokach
-bez powtórzeń (\code{retries} = 0):
+Uruchamiamy (\verb!./rn! lub \verb!.\rn.ps1!). Poprawny wynik (0 powtórzeń, 50 kroków):
 \begin{out}
 termination code: max_model_number
                  runtime (minutes), retries, steps        0.10         0        50
 \end{out}
 \dosprawdzenia{wynik sprawdzony w Windows natywnie; w Linuksie/macOS spodziewany taki sam}
-Przy pierwszym uruchomieniu MESA tworzy pliki cache (równanie stanu, nieprzezroczystości, reakcje
-jądrowe), co trwa dodatkowe kilka minut.
-
 \subsection{Pełna ewolucja}
 
 Po \verb!./rn! po kilku minutach pojawiają się okna z wizualizacją ewolucji gwiazdy (poza wersją
-natywną Windows). Gwiazda przechodzi kolejno: kontrakcję pre-MS, ciąg główny, gałąź czerwonych
-olbrzymów, błysk helowy (okolice kroku 10\,700), gałąź horyzontalną, AGB z~pulsami termicznymi, aż do
-stygnącego białego karła. Obliczenia kończą się po osiągnięciu \code{log\_L\_lower\_limit}:
+natywną Windows). Koniec obliczeń:
 \begin{out}
 save photos/x122 for model 14122
 termination code: log_L_lower_limit
@@ -538,7 +422,7 @@ termination code: log_L_lower_limit
 profile), \code{photos} (zdjęcia do restartów) i \code{png} (wykresy).
 
 W trakcie ewolucji możemy edytować plik \code{inlist.pgstar}, w szczególności dodawać różne sposoby
-wizualizacji. Zmiany są wczytywane na bieżąco.
+wizualizacji.
 
 \begin{uwaga}[Znane problemy]
 \begin{itemize}[leftmargin=1.2em]
@@ -595,15 +479,35 @@ Super Micro, 2× Intel Xeon Gold 6238R 2,2 GHz (2×26 rdzeni), 376 GB RAM, Ubunt
 AMD Ryzen 7 7435HS 3,1 GHz, 16 GB RAM, Windows 11, WSL2 & 2: 393,79; 4: 198,33; 8: 152,86 \\
 MacBook Air M4, 16 GB RAM & 2: nie skończył przez całe zajęcia \\
 Intel i7-4770K 3,4 GHz, 16 GB RAM, Ubuntu & 1: 783,99; 2: 420,83; 3: 308,45; 4: 246,79; 5: 237,08; 6: 227,10; 7: 218,53; 8: 210,82 \\
-AMD Ryzen 9 5900X, 32 GB RAM, Windows 11 natywnie (gfortran 16.1 MinGW) & 12: 70,77$^{*}$ \\
+AMD Ryzen 9 5900X, 32 GB RAM, Windows 11 natywnie (gfortran 16.1 MinGW) & 12: 70,77 \\
 \bottomrule
 \end{longtable}
 }
-{\small $^{*}$przez pierwsze ok.~2~min równolegle działały inne testy; 13\,972 kroki, 295 powtórzeń.}
 
 % =====================================================================
 \appendix
 \section{Windows natywnie: szczegóły i rozwiązywanie problemów}\label{app:win}
+
+Sprawdzone 6--7~października 2026: Windows~11, AMD Ryzen~9 5900X, 32~GB RAM, gfortran 16.1.0
+(MSYS2), HDF5 2.1.1. Ograniczenia: brak wykresów pgstar (MESA zbudowana bez PGPLOT,
+\code{pgstar\_flag} jest ignorowane), nie są budowane GYRE, ADIPLS, \code{binary} i \code{astero},
+wyniki nie są identyczne bit w bit z~Linuksem (różnice na poziomie zaokrągleń).
+
+\subsection{Testy modułów (opcjonalnie)}
+
+Po instalacji MESA, w oknie z ustawionymi zmiennymi (kilkanaście minut):
+\begin{ps}
+C:\MESA\MESA-minimal-test-1MSun-star\windows\test_mesa.ps1
+\end{ps}
+Wyniki są porównywane z wzorcami z Linuksa (tolerancja $10^{-8}$). Oczekiwane: \code{OK} wszędzie
+oprócz \code{num} (całkowanie sztywnych równań różniczkowych wzmacnia różnice zaokrągleń do
+$10^{-5}$) i \code{net} (jedna linia, różnica $5\cdot10^{-7}$).
+
+\subsection{Parametry \texttt{mesa\_env.ps1}}
+
+\code{-MesaDir} (inne położenie MESA niż katalog obok repozytorium), \code{-Threads}
+(liczba wątków, domyślnie liczba rdzeni), \code{-Toolchain} (MSYS2 w innym miejscu niż
+\verb!C:\msys64!).
 
 \subsection{Co zmieniono względem instalacji na Linuksie}
 
