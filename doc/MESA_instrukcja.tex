@@ -353,8 +353,8 @@ C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1
 \item Kompilacja i uruchomienie przykładu:
 \begin{ps}
 cd C:\MESA\MESA-minimal-test-1MSun-star
-.\mk.ps1
-.\rn.ps1
+./mk
+./rn
 \end{ps}
 \end{enumerate}
 Dalej jak w rozdziale~\ref{sec:run}.
@@ -365,15 +365,13 @@ Dalej jak w rozdziale~\ref{sec:run}.
 \subsection{Polecenia}
 
 \begin{center}
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}ll@{}}
 \toprule
-& \textbf{Linux, macOS, WSL} & \textbf{Windows natywnie} \\
-\midrule
-kompilacja & \verb!./mk! & \verb!.\mk.ps1! \\
-start od początku & \verb!./rn! & \verb!.\rn.ps1! \\
-restart od ostatniego zdjęcia & \verb!./re! & \verb!.\re.ps1! \\
-restart od zdjęcia \code{x500} & \verb!./re x500! & \verb!.\re.ps1 x500! \\
-sprzątanie kompilacji & \verb!./clean! & \verb!.\clean.ps1! \\
+kompilacja & \verb!./mk! \\
+start od początku & \verb!./rn! \\
+restart od ostatniego zdjęcia & \verb!./re! \\
+restart od zdjęcia \code{x500} & \verb!./re x500! \\
+sprzątanie kompilacji & \verb!./clean! \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -389,9 +387,9 @@ cd ../zams_test
 \end{sh}
 W Windows natywnie:
 \begin{ps}
-mkdir ..\zams_test
-Copy-Item star.exe, inlist, inlist.pgstar, history_columns.list, rn.ps1 ..\zams_test
-cd ..\zams_test
+mkdir ../zams_test
+Copy-Item star.exe, inlist, inlist.pgstar, history_columns.list, rn.ps1 ../zams_test
+cd ../zams_test
 \end{ps}
 W pliku \code{inlist} (edytor \code{nano inlist} lub \code{notepad inlist}) zmieniamy w sekcji
 \code{\&star\_job}
@@ -402,7 +400,7 @@ a w sekcji \code{\&controls} dopisujemy linijkę
 \begin{out}
   max_model_number = 50
 \end{out}
-Uruchamiamy (\verb!./rn! lub \verb!.\rn.ps1!). Poprawny wynik (0 powtórzeń, 50 kroków):
+Uruchamiamy \verb!./rn!. Poprawny wynik (0 powtórzeń, 50 kroków):
 \begin{out}
 termination code: max_model_number
                  runtime (minutes), retries, steps        0.10         0        50
@@ -578,17 +576,18 @@ Get-ChildItem C:\MESA\MESA-minimal-test-1MSun-star -Recurse | Unblock-File
   Przebuduj moduł \code{star} i katalog roboczy:
 \begin{ps}
 C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1 -Modules star -Clean
-.\clean.ps1; .\mk.ps1
+./clean
+./mk
 \end{ps}
 \item[\code{bad header info in ...eosFreeEOS\_data...}]
   Objaw błędu z punktu~3. Usuń pliki cache zapisane przez wadliwy program i zbuduj \code{star.exe}
-  ponownie (\verb!.\clean.ps1; .\mk.ps1!):
+  ponownie (\verb!./clean!, \verb!./mk!):
 \begin{ps}
 Remove-Item C:\MESA\mesa-24.08.1\data\*\cache\*.bin
 \end{ps}
 \item[\code{star.exe} kończy się natychmiast, bez komunikatów (kod \code{0xC00000FD})]
-  Przepełnienie stosu (punkt~4): ponownie \code{install\_mesa.ps1}, potem
-  \verb!.\clean.ps1; .\mk.ps1!.
+  Przepełnienie stosu (punkt~4): ponownie \code{install\_mesa.ps1}, potem \verb!./clean!,
+  \verb!./mk!.
 \item[Pierwsze uruchomienie jest bardzo wolne]
   Tworzenie plików cache (jednorazowo). Rozpakowywanie i kompilację spowalnia też antywirus.
   Można (jako administrator) wyłączyć skanowanie katalogu \verb!C:\MESA!.

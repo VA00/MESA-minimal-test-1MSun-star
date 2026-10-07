@@ -27,16 +27,16 @@ cd MESA-minimal-test-1MSun-star
 ./rn
 ```
 
-Windows natywnie (PowerShell 7, repozytorium w `C:\MESA`, obok `mesa-24.08.1`):
+Windows natywnie (PowerShell 7):
 
 ```powershell
 . C:\MESA\MESA-minimal-test-1MSun-star\windows\mesa_env.ps1
 cd C:\MESA\MESA-minimal-test-1MSun-star
-.\mk.ps1
-.\rn.ps1
+./mk
+./rn
 ```
 
-Restart od ostatniego zdjęcia: `./re` (`.\re.ps1`), od wybranego: `./re x500` (`.\re.ps1 x500`).
+Restart od ostatniego zdjęcia: `./re`, od wybranego: `./re x500`.
 
 Wyniki: `LOGS/` (dane ewolucji), `photos/` (zdjęcia do restartów), `png/` (wykresy pgstar).
 Animacje z wykresów: `./parallel_movie_encode.sh` lub `ffmpeg` (rozdział „Animacje” w instrukcji).
