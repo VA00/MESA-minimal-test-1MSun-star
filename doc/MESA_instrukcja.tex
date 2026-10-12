@@ -4,90 +4,42 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
 \usepackage[polish]{babel}
 \usepackage{lmodern}
-\usepackage{textcomp}
-\usepackage{upquote}
 \usepackage{microtype}
 \usepackage[a4paper,margin=2.2cm]{geometry}
-\usepackage{xcolor}
-\usepackage{listings}
-\usepackage{enumitem}
+\usepackage{parskip}
+\usepackage{upquote}
 \usepackage{booktabs}
-\usepackage{array}
-\usepackage{longtable}
-\usepackage{tcolorbox}
+\usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.55em}
-\setlength{\emergencystretch}{3em}
-
-% ---------------------------------------------------------------- notatki robocze
-% \uwagitrue  -> czerwone notatki "do sprawdzenia" widoczne (wersja robocza)
-% \uwagifalse -> notatki ukryte (wersja dla studentow)
-\newif\ifuwagi
-\uwagitrue
-\newcommand{\dosprawdzenia}[1]{\ifuwagi\textcolor{red}{\small[do sprawdzenia: #1]}\fi}
-
-\newcommand{\repourl}{\url{https://github.com/VA00/MESA-minimal-test-1MSun-star}}
-
-% ---------------------------------------------------------------- listingi
-\definecolor{codebg}{gray}{0.95}
-\definecolor{coderule}{gray}{0.70}
-\lstdefinestyle{cmd}{
-  basicstyle=\ttfamily\small, columns=fullflexible, keepspaces=true, upquote=true,
-  showstringspaces=false, breaklines=false, frame=single, framerule=0.4pt,
-  rulecolor=\color{coderule}, backgroundcolor=\color{codebg},
-  xleftmargin=3pt, xrightmargin=3pt, framesep=4pt, aboveskip=0.6em, belowskip=0.6em}
-\lstdefinestyle{out}{
-  basicstyle=\ttfamily\small, columns=fullflexible, keepspaces=true, upquote=true,
-  showstringspaces=false, breaklines=false, frame=leftline, framerule=1.5pt,
-  rulecolor=\color{coderule}, xleftmargin=8pt, framesep=6pt, aboveskip=0.6em, belowskip=0.6em}
-% szeroki blok (wysuniety na marginesy) dla dlugich polecen jednolinijkowych
-\lstdefinestyle{cmdwide}{style=cmd, basicstyle=\ttfamily\footnotesize,
-  xleftmargin=-14mm, xrightmargin=-14mm}
-\lstnewenvironment{shw}{\lstset{style=cmdwide}}{}
-\lstnewenvironment{psw}{\lstset{style=cmdwide}}{}
-\lstnewenvironment{sh}{\lstset{style=cmd}}{}   % bash / zsh
-\lstnewenvironment{ps}{\lstset{style=cmd}}{}   % PowerShell 7
-\lstnewenvironment{out}{\lstset{style=out}}{}  % wydruk, zawartosc plikow
-\newcommand{\code}[1]{\texttt{#1}}
-
-\newtcolorbox{uwaga}[1][Uwaga]{colback=yellow!6, colframe=orange!70!black, fonttitle=\bfseries,
-  title=#1, boxrule=0.5pt, arc=1pt, left=4pt, right=4pt, top=2pt, bottom=2pt}
-\newtcolorbox{info}[1][Informacja]{colback=blue!3, colframe=blue!50!black, fonttitle=\bfseries,
-  title=#1, boxrule=0.5pt, arc=1pt, left=4pt, right=4pt, top=2pt, bottom=2pt}
-
-\setlist{itemsep=0.2em, topsep=0.3em}
 
 \title{Instalacja i minimalny przykład komputerowej ewolucji gwiazdy w~programie MESA\\[0.3em]
   \Large Linux, macOS, Windows (WSL i natywnie)}
 \author{Andrzej Odrzywołek\\ \small\href{mailto:andrzej.odrzywolek@uj.edu.pl}{andrzej.odrzywolek@uj.edu.pl}}
-\date{wersja robocza, 7~października 2026}
+\date{wersja robocza, 12~października 2026}
 
 \begin{document}
+\sloppy  % dlugie nazwy w \texttt nie dziela sie, wiec luzniejsze wiersze zamiast wystawania na margines
 \maketitle
 
-\begin{info}[O tej instrukcji]
 Instrukcja i wszystkie potrzebne pliki znajdują się w repozytorium\\
-\repourl\\
+\url{https://github.com/VA00/MESA-minimal-test-1MSun-star}
+
 Przykład to absolutnie minimalna konfiguracja MESA r24.08.1: ewolucja gwiazdy o masie
-$1\,M_\odot$ od jednorodnego obłoku H/He (pre-MS) do stygnącego białego karła, ok.~14\,000 kroków.
+$1\,M_\odot$ od jednorodnego obłoku H/He (pre-MS) do stygnącego białego karła, ok.~15\,000 kroków.
 Obliczenia trwają od ok.~1~godziny (szybki komputer) do kilku godzin.
 
-\textbf{Którą część czytać?}
-\begin{itemize}[leftmargin=1.2em]
+Którą część czytać?
+\begin{itemize}
   \item Pracownia komputerowa Fort OA (MESA już zainstalowana): rozdział~\ref{sec:pracownia}.
   \item Własny komputer z Linuksem: rozdział~\ref{sec:linux}.
   \item Mac z procesorem Apple Silicon (M1--M4): rozdział~\ref{sec:mac}.
   \item Windows: \textbf{zalecane} WSL (pełna funkcjonalność, z wykresami), rozdział~\ref{sec:wsl}.
         Bez WSL: wersja natywna (eksperymentalna, na razie bez wykresów), rozdział~\ref{sec:win}.
 \end{itemize}
-Potem: uruchomienie przykładu (rozdział~\ref{sec:run}), animacje (\ref{sec:anim}) i tabela
-benchmarków (\ref{sec:bench}).
-\end{info}
+Potem: uruchomienie przykładu (rozdział~\ref{sec:run}), pamięć i równanie stanu (\ref{sec:pamiec}),
+animacje (\ref{sec:anim}) i tabela benchmarków (\ref{sec:bench}).
 
 \tableofcontents
 
@@ -96,8 +48,9 @@ benchmarków (\ref{sec:bench}).
 
 \begin{itemize}
   \item Dysk: pełna instalacja MESA to ok.~21~GB, MESA SDK ok.~0,7~GB.
-  \item Pamięć: minimum teoretycznie 8~GB RAM. W praktyce na pracowni na komputerach z 8GB obliczenia zajmujące 
-  7.6 GB zawieszają się. 
+  \item Pamięć: 8~GB RAM wystarcza. Od 12~października 2026 przykład zajmuje najwyżej ok.~2,7~GiB,
+  bo w~pliku \texttt{inlist} jest \verb!use_FreeEOS = .false.! (rozdział~\ref{sec:pamiec}).
+  Wcześniej sam program zajmował do 7,8~GiB i na komputerach z~8~GB obliczenia się zawieszały.
   \item Ścieżki do katalogów z MESA \textbf{nie mogą zawierać spacji}.
   \item MESA SDK \textbf{dokładnie w podanej wersji} (Linux, WSL: 24.7.1; macOS: 25.8.1), nie
   najnowszej. SDK od wersji 26.3 ma kompilator gcc 15.2, z którym MESA 24.08.1 rozbiega się już
@@ -107,206 +60,210 @@ benchmarków (\ref{sec:bench}).
 % =====================================================================
 \section{Pracownia komputerowa Fort OA}\label{sec:pracownia}
 
-MESA jest zainstalowana systemowo w~\verb!/opt/MESA!. Wystarczającą ilość pamięci powyżej 8~GB mają w~tej
-chwili komputery: Cep, Aqr, Eri, Sgr, Hya.
+MESA jest zainstalowana systemowo w~\verb!/opt/MESA!. Wystarczającą ilość pamięci powyżej 8~GB mają
+w~tej chwili komputery: Cep, Aqr, Eri, Sgr, Hya. Po zmianie z~12~października 2026
+(rozdział~\ref{sec:pamiec}) przykład powinien działać na wszystkich komputerach pracowni, ale nie
+zostało to jeszcze sprawdzone na pracowni.
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
+\begin{enumerate}
 \item Zmienne środowiskowe dla MESA SDK i programu MESA:
-\begin{sh}
+\begin{verbatim}
 export MESASDK_ROOT=/opt/MESA/mesasdk
 source $MESASDK_ROOT/bin/mesasdk_init.sh
 export MESA_DIR=/opt/MESA/mesa-24.08.1
-\end{sh}
+\end{verbatim}
 \item Aby uniknąć problemów z zapisem plików cache (eos -- równanie stanu, kap --
   nieprzezroczystość, rates -- reakcje jądrowe, ionization -- jonizacja), tworzymy własny katalog
-  i ustawiamy zmienną \code{MESA\_CACHES\_DIR}:
-\begin{sh}
+  i ustawiamy zmienną \texttt{MESA\_CACHES\_DIR}:
+\begin{verbatim}
 mkdir -p $HOME/.mesa
 export MESA_CACHES_DIR=$HOME/.mesa
-\end{sh}
-\item Pracujemy w katalogu \verb!/data/rok4! (zamień \code{rok4} na swój rocznik). Testy pokazują,
+\end{verbatim}
+\item Pracujemy w katalogu \verb!/data/rok4! (zamień \texttt{rok4} na swój rocznik). Testy pokazują,
   że symulacja działa tam ok.~3 razy szybciej niż w~katalogu \verb!$HOME!, ale wyniki nie są
   dostępne na innych komputerach.
-\begin{sh}
+\begin{verbatim}
 cd /data/rok4
 mkdir MESA2027
 cd MESA2027
 git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
 cd MESA-minimal-test-1MSun-star
-\end{sh}
+\end{verbatim}
 \item Kompilacja i uruchomienie: \verb!./mk!, \verb!./rn! (rozdział~\ref{sec:run}).
 \end{enumerate}
 
-\begin{uwaga}[Znany problem]
-Na komputerach pracowni obliczenia zawieszały się przy kroku 10\,703 (okolice błysku helowego).
-\end{uwaga}
+\paragraph{Znany problem.} Na komputerach pracowni obliczenia zawieszały się przy kroku 10\,703
+(okolice błysku helowego). Przyczyna i rozwiązanie: rozdział~\ref{sec:pamiec}.
 
-\begin{info}[Zadanie]
-Proszę powtórzyć testowy run w katalogach \verb!/data/rok4! oraz \verb!$HOME! i podać konkretne wartości czasu obliczeń. 
-\end{info}
+\paragraph{Zadanie.} Proszę powtórzyć testowy run w katalogach \verb!/data/rok4! oraz \verb!$HOME!
+i podać konkretne wartości czasu obliczeń.
 
 % =====================================================================
 \section{Linux (Ubuntu) -- instalacja na własnym komputerze}\label{sec:linux}
 
-Aktualizacja i sprawdzenie: 18 października 2025 (MESA SDK 24.7.1, MESA 24.08.1).
+Sprawdzone 12~października 2026 na Ubuntu 24.04 (MESA SDK 24.7.1, MESA 24.08.1).
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
+\begin{enumerate}
 \item Pobieramy MESA SDK (24.7.1, ok.~209~MB, ok.~8~min) i MESA (24.08.1, ok.~2~GB, ok.~18~min).
-  Serwer SDK odrzuca pobieranie z konsoli, dlatego \code{wget} „udaje” przeglądarkę Firefox:
-\begin{shw}
+  Serwer SDK odrzuca pobieranie z konsoli, dlatego \texttt{wget} „udaje” przeglądarkę Firefox:
+\begin{footnotesize}
+\begin{verbatim}
 mkdir ~/MESA
 cd ~/MESA
-wget -U firefox http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/mesasdk-x86_64-linux-24.7.1.tar.gz
+wget -U firefox \
+http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/mesasdk-x86_64-linux-24.7.1.tar.gz
 wget https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
-\end{shw}
+\end{verbatim}
+\end{footnotesize}
 \item Rozpakowujemy SDK i ustawiamy zmienne (bash):
-\begin{sh}
+\begin{verbatim}
 tar xvfz mesasdk-x86_64-linux-24.7.1.tar.gz -C ~/MESA/
 export MESASDK_ROOT=~/MESA/mesasdk
 source $MESASDK_ROOT/bin/mesasdk_init.sh
-\end{sh}
+\end{verbatim}
   Powinny pojawić się komunikaty:
-\begin{out}
+\begin{verbatim}
 mesasdk_init.sh: checking architecture
 mesasdk_init.sh: regenerating headers
 mesasdk_init.sh: checking prerequisites
-\end{out}
+\end{verbatim}
 \item Na ogół brakuje kilku programów, o czym informuje komunikat typu:
-\begin{out}
+\begin{verbatim}
 mesasdk_init.sh: missing prerequisites:
   C shell Z library X11 library
-\end{out}
-  Doinstalowujemy je i powtarzamy krok~2 (\code{source ...}). Instalujemy też \code{git}
-  i~\code{unzip} (kroki 4 i~7), których może brakować w świeżej instalacji Ubuntu:
-\begin{sh}
+\end{verbatim}
+  Doinstalowujemy je i powtarzamy krok~2 (\texttt{source ...}). Instalujemy też \texttt{git}
+  i~\texttt{unzip} (kroki 4 i~7), których może brakować w świeżej instalacji Ubuntu:
+\begin{verbatim}
 sudo apt install tcsh zlib1g-dev libx11-dev git unzip
-\end{sh}
-\item Rozpakowujemy MESA i ustawiamy kolejne zmienne (liczba wątków według liczby rdzeni):
-\begin{sh}
+\end{verbatim}
+\item Rozpakowujemy MESA i ustawiamy kolejne zmienne (liczba wątków według liczby rdzeni,
+  rozdział~\ref{sec:bench}):
+\begin{verbatim}
 cd ~/MESA
 unzip mesa-24.08.1.zip
 export MESA_DIR=~/MESA/mesa-24.08.1
 export OMP_NUM_THREADS=4
-\end{sh}
+\end{verbatim}
 \item Opcjonalnie, żeby zmienne ustawiały się przy każdym uruchomieniu terminala, dopisujemy je do
   \verb!~/.bashrc!:
-\begin{sh}
+\begin{verbatim}
 echo 'export MESASDK_ROOT=~/MESA/mesasdk' >> ~/.bashrc
 echo 'source $MESASDK_ROOT/bin/mesasdk_init.sh' >> ~/.bashrc
 echo 'export MESA_DIR=~/MESA/mesa-24.08.1' >> ~/.bashrc
 echo 'export OMP_NUM_THREADS=4' >> ~/.bashrc
-\end{sh}
+\end{verbatim}
 \item Instalacja (kompilacja trwa kilkanaście minut):
-\begin{sh}
+\begin{verbatim}
 cd $MESA_DIR
 ./install
-\end{sh}
+\end{verbatim}
   Jeżeli się powiodła, pojawi się dużo gwiazdek i napis:
-\begin{out}
+\begin{verbatim}
 ************************************************
 MESA installation was successful
 ************************************************
-\end{out}
+\end{verbatim}
 \item Pobieramy przykład:
-\begin{sh}
+\begin{verbatim}
 cd ~/MESA
 git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
 cd MESA-minimal-test-1MSun-star
-\end{sh}
+\end{verbatim}
   i uruchamiamy go poleceniami \verb!./mk!, \verb!./rn! (rozdział~\ref{sec:run}).
 \end{enumerate}
 
-\begin{info}[Instalacja na dysku zewnętrznym]
-Na systemach plików bez dowiązań symbolicznych (exFAT, FAT32) SDK i~MESA nie działają. Można je
-zainstalować na dysku lokalnym, a potem skopiować na dysk USB z~rozwinięciem dowiązań:
-\begin{sh}
+\paragraph{Instalacja na dysku zewnętrznym.} Na systemach plików bez dowiązań symbolicznych (exFAT,
+FAT32) SDK i~MESA nie działają. Można je zainstalować na dysku lokalnym, a potem skopiować na dysk
+USB z~rozwinięciem dowiązań:
+\begin{small}
+\begin{verbatim}
 rsync -aL --info=progress2 ~/MESA/mesa-24.08.1/ /media/$USER/USB/mesa-24.08.1/
 rsync -aL --info=progress2 ~/MESA/mesasdk/ /media/$USER/USB/mesasdk/
-\end{sh}
-i ustawić \code{MESA\_DIR} oraz \code{MESASDK\_ROOT} na nowe położenie.
-\end{info}
+\end{verbatim}
+\end{small}
+i ustawić \texttt{MESA\_DIR} oraz \texttt{MESASDK\_ROOT} na nowe położenie.
 
 % =====================================================================
 \section{macOS (Apple Silicon)}\label{sec:mac}
 
 Aktualizacja: 12 października 2025 (MESA SDK 25.8.1, MESA 24.08.1).
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
+\begin{enumerate}
 \item Pobieramy i instalujemy MESA SDK dla Apple Silicon, wersja 25.8.1 (sierpień 2025), ze strony\\
-  {\small\url{http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk}}\\
-  plik \code{mesasdk-aarch64-macos-25.8.1.pkg} (nie najnowszy, rozdział~\ref{sec:wymagania}).
+  \url{http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk}\\
+  plik \texttt{mesasdk-aarch64-macos-25.8.1.pkg} (nie najnowszy, rozdział~\ref{sec:wymagania}).
   Instalacja jest okienkowa, po kliknięciu na pobraną „paczkę”. SDK trafia do
   \verb!/Applications/mesasdk!. Starsza wersja 24.10.1 już nie działa.
 \item Zmienne środowiskowe (domyślna powłoka zsh jest zgodna z bash):
-\begin{sh}
+\begin{verbatim}
 export MESASDK_ROOT=/Applications/mesasdk
 source $MESASDK_ROOT/bin/mesasdk_init.sh
-\end{sh}
+\end{verbatim}
 \item Pobieramy MESA (plik zip z Zenodo, \url{https://zenodo.org/records/13353788}). Safari sam
-  rozpakowuje archiwum. Cały katalog \code{mesa-24.08.1} najlepiej przenieść do \verb!~/MESA!.
+  rozpakowuje archiwum. Cały katalog \texttt{mesa-24.08.1} najlepiej przenieść do \verb!~/MESA!.
   To samo z terminala:
-\begin{sh}
+\begin{verbatim}
 mkdir ~/MESA
 cd ~/MESA
 curl -L -O https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
 unzip mesa-24.08.1.zip
-\end{sh}
+\end{verbatim}
 \item Kolejne zmienne:
-\begin{sh}
+\begin{verbatim}
 export MESA_DIR=$HOME/MESA/mesa-24.08.1
 export OMP_NUM_THREADS=8
 export PATH=$PATH:$MESA_DIR/scripts/shmesa
-\end{sh}
+\end{verbatim}
   Żeby ustawiały się automatycznie, dopisujemy powyższe linie (także te z kroku~2) do
   \verb!~/.zshrc!.
 \item Instalacja:
-\begin{sh}
+\begin{verbatim}
 cd $MESA_DIR
 ./install
-\end{sh}
+\end{verbatim}
 \item Aby MESA cokolwiek wyświetlała (okna pgstar), trzeba zainstalować serwer X, np.~XQuartz
   (\url{https://www.xquartz.org}).
 \item Pobieramy przykład i uruchamiamy go jak w Linuksie:
-\begin{sh}
+\begin{verbatim}
 cd ~/MESA
 git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
 cd MESA-minimal-test-1MSun-star
-\end{sh}
-  Czas obliczeń: 135~min przy \code{OMP\_NUM\_THREADS=8} na procesorze M3 Max.
+\end{verbatim}
+  Czas obliczeń: 135~min przy \texttt{OMP\_NUM\_THREADS=8} na procesorze M3 Max.
 \end{enumerate}
 
-\begin{info}[Zadanie]
-Nowoczesne procesory (Apple M3, M4, ale też np.~Intel i9 285) mają rdzenie typu
+\paragraph{Zadanie.} Nowoczesne procesory (Apple M3, M4, ale też np.~Intel i9 285) mają rdzenie typu
 „performance” (szybkie, gorące) i~„efficiency” (wolniejsze, chłodniejsze). W Linuksie można
-przypisać symulację do wybranych rdzeni poleceniem \code{taskset}. Jak zrobić to w macOS?
-\end{info}
+przypisać symulację do wybranych rdzeni poleceniem \texttt{taskset}. Jak zrobić to w macOS?
 
 % =====================================================================
 \section{Windows -- WSL (zalecane)}\label{sec:wsl}
 
-\dosprawdzenia{rozdział przygotowany na podstawie dokumentacji WSL, na komputerze testowym nie było WSL}
+Ten rozdział jest przygotowany na podstawie dokumentacji WSL. Na komputerze, na którym testowano
+wersję dla Windows, nie było WSL, więc te kroki nie zostały jeszcze sprawdzone.
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
+\begin{enumerate}
 \item W PowerShell \textbf{uruchomionym jako administrator}, potem restart komputera:
-\begin{ps}
+\begin{verbatim}
 wsl --install
-\end{ps}
+\end{verbatim}
   W oknie Ubuntu, które otworzy się po restarcie, zakładamy użytkownika i hasło.
 \item Pamięć dla WSL. W zwykłym PowerShell:
-\begin{ps}
+\begin{verbatim}
 notepad $env:USERPROFILE\.wslconfig
-\end{ps}
+\end{verbatim}
   wpisujemy (np.~dla komputera z 16~GB RAM)
-\begin{out}
+\begin{verbatim}
 [wsl2]
 memory=12GB
-\end{out}
+\end{verbatim}
   zapisujemy plik i wykonujemy \verb!wsl --shutdown!.
 \item W oknie Ubuntu:
-\begin{sh}
+\begin{verbatim}
 sudo apt update
 sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget git
-\end{sh}
+\end{verbatim}
   i dalej według rozdziału~\ref{sec:linux}, w katalogu \verb!~/MESA! (\textbf{nie} w \verb!/mnt/c!).
 \end{enumerate}
 
@@ -315,55 +272,57 @@ sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget git
 
 Wersja natywna nie wyświetla wykresów (pgstar). Wszystkie polecenia wpisujemy w~PowerShell~7.
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
+\begin{enumerate}
 \item Instalujemy PowerShell~7:
-\begin{ps}
+\begin{verbatim}
 winget install --id Microsoft.PowerShell -e
-\end{ps}
+\end{verbatim}
   Dalej pracujemy w oknie „PowerShell 7”.
 \item MSYS2 i kompilator gfortran:
-\begin{psw}
+\begin{footnotesize}
+\begin{verbatim}
 winget install --id MSYS2.MSYS2 -e
 C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
 C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-gcc-fortran
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-make
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-hdf5
-\end{psw}
+\end{verbatim}
+\end{footnotesize}
 \item Python i Git, a potem \textbf{nowe okno} PowerShell~7:
-\begin{ps}
+\begin{verbatim}
 winget install --id Python.Python.3.14 -e
 winget install --id Git.Git -e
-\end{ps}
+\end{verbatim}
 \item Pobranie i rozpakowanie MESA (komunikaty \verb!Can't create ...! można zignorować):
-\begin{ps}
+\begin{verbatim}
 mkdir C:\MESA
 cd C:\MESA
 curl.exe -L -O https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
 tar -xf mesa-24.08.1.zip
-\end{ps}
+\end{verbatim}
   W sieci OA zamiast Zenodo:
-\begin{ps}
+\begin{verbatim}
 curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
-\end{ps}
+\end{verbatim}
 \item Pobranie przykładu:
-\begin{ps}
+\begin{verbatim}
 git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
-\end{ps}
+\end{verbatim}
 \item Zmienne środowiskowe, \textbf{w każdym nowym oknie} PowerShell:
-\begin{ps}
+\begin{verbatim}
 . C:\MESA\MESA-minimal-test-1MSun-star\windows\mesa_env.ps1
-\end{ps}
-\item Kompilacja MESA (kilka minut, na końcu napis \code{MESA installation was successful}):
-\begin{ps}
+\end{verbatim}
+\item Kompilacja MESA (kilka minut, na końcu napis \texttt{MESA installation was successful}):
+\begin{verbatim}
 C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1
-\end{ps}
+\end{verbatim}
 \item Kompilacja i uruchomienie przykładu:
-\begin{ps}
+\begin{verbatim}
 cd C:\MESA\MESA-minimal-test-1MSun-star
 ./mk
 ./rn
-\end{ps}
+\end{verbatim}
 \end{enumerate}
 Dalej jak w rozdziale~\ref{sec:run}.
 
@@ -373,82 +332,148 @@ Dalej jak w rozdziale~\ref{sec:run}.
 \subsection{Polecenia}
 
 \begin{center}
-\begin{tabular}{@{}ll@{}}
+\begin{tabular}{ll}
 \toprule
 kompilacja & \verb!./mk! \\
 start od początku & \verb!./rn! \\
 restart od ostatniego zdjęcia & \verb!./re! \\
-restart od zdjęcia \code{x500} & \verb!./re x500! \\
+restart od zdjęcia \texttt{x500} & \verb!./re x500! \\
 sprzątanie kompilacji & \verb!./clean! \\
 \bottomrule
 \end{tabular}
 \end{center}
-Obliczenia przerywamy kombinacją \code{Ctrl+C}. Zdjęcia do restartów są w katalogu \code{photos}.
+Obliczenia przerywamy kombinacją \texttt{Ctrl+C}. Zdjęcia do restartów są w katalogu \texttt{photos}.
 
 \subsection{Szybki test: 50 kroków od ciągu głównego}\label{sec:zams}
 
 Po kompilacji (\verb!./mk!):
-\begin{sh}
+\begin{verbatim}
 mkdir ../zams_test
 cp star inlist inlist.pgstar history_columns.list rn ../zams_test/
 cd ../zams_test
-\end{sh}
+\end{verbatim}
 W Windows natywnie:
-\begin{ps}
+\begin{small}
+\begin{verbatim}
 mkdir ../zams_test
 Copy-Item star.exe, inlist, inlist.pgstar, history_columns.list, rn.ps1 ../zams_test
 cd ../zams_test
-\end{ps}
-W pliku \code{inlist} (edytor \code{nano inlist} lub \code{notepad inlist}) zmieniamy w sekcji
-\code{\&star\_job}
-\begin{out}
+\end{verbatim}
+\end{small}
+W pliku \texttt{inlist} (edytor \texttt{nano inlist} lub \texttt{notepad inlist}) zmieniamy w sekcji
+\verb!&star_job!
+\begin{verbatim}
   create_pre_main_sequence_model = .false.
-\end{out}
-a w sekcji \code{\&controls} dopisujemy linijkę
-\begin{out}
+\end{verbatim}
+a w sekcji \verb!&controls! dopisujemy linijkę
+\begin{verbatim}
   max_model_number = 50
-\end{out}
+\end{verbatim}
 Uruchamiamy \verb!./rn!. Poprawny wynik (0 powtórzeń, 50 kroków):
-\begin{out}
+\begin{verbatim}
 termination code: max_model_number
                  runtime (minutes), retries, steps        0.10         0        50
-\end{out}
-\dosprawdzenia{wynik sprawdzony w Windows natywnie; w Linuksie/macOS spodziewany taki sam}
+\end{verbatim}
+Wynik sprawdzony w~Windows natywnie i w~Linuksie (także po zmianie z~12~października 2026),
+w~macOS jeszcze nie.
+
 \subsection{Pełna ewolucja}
 
 Po \verb!./rn! po kilku minutach pojawiają się okna z wizualizacją ewolucji gwiazdy (poza wersją
 natywną Windows). Koniec obliczeń:
-\begin{out}
-save photos/x122 for model 14122
+\begin{verbatim}
+save photos/x986 for model 14986
 termination code: log_L_lower_limit
 
-                 runtime (minutes), retries, steps      113.25       303     14122
-\end{out}
-(MacBook M3 Max, 10~wątków). Wyniki trafiają do katalogów \code{LOGS} (\code{history.data},
-profile), \code{photos} (zdjęcia do restartów) i \code{png} (wykresy).
+                 runtime (minutes), retries, steps      ...         491     14986
+\end{verbatim}
+(Ubuntu 24.04; czas obliczeń zależy od komputera, rozdział~\ref{sec:bench}). Do 12~października 2026, z~FreeEOS, było
+303~powtórzeń i 14\,122~kroki (rozdział~\ref{sec:pamiec}). Wyniki trafiają do katalogów
+\texttt{LOGS} (\texttt{history.data}, profile), \texttt{photos} (zdjęcia do restartów)
+i \texttt{png} (wykresy).
 
-W trakcie ewolucji możemy edytować plik \code{inlist.pgstar}, w szczególności dodawać różne sposoby
+W trakcie ewolucji możemy edytować plik \texttt{inlist.pgstar}, w szczególności dodawać różne sposoby
 wizualizacji.
 
-\begin{uwaga}[Znane problemy]
-\begin{itemize}[leftmargin=1.2em]
-  \item Błąd \code{Cannot match namelist object name read\_extra\_pgstar\_inlist1}: w pliku
-        \code{inlist} trzeba zmienić \code{read\_extra\_pgstar\_inlist1} na
-        \code{read\_extra\_pgstar\_inlist(1)} oraz \code{extra\_pgstar\_inlist1\_name} na
-        \code{extra\_pgstar\_inlist\_name(1)} (w repozytorium już poprawione).
-  \item Błąd związany z \code{adipls} może wynikać ze zmiany nazewnictwa nowych wersji MESA: nie
+\paragraph{Znane problemy.}
+\begin{itemize}
+  \item Błąd \verb!Cannot match namelist object name read_extra_pgstar_inlist1!: w pliku
+        \texttt{inlist} trzeba zmienić nazwy (w repozytorium już poprawione):
+\begin{verbatim}
+read_extra_pgstar_inlist1   ->  read_extra_pgstar_inlist(1)
+extra_pgstar_inlist1_name   ->  extra_pgstar_inlist_name(1)
+\end{verbatim}
+  \item Błąd związany z \texttt{adipls} może wynikać ze zmiany nazewnictwa nowych wersji MESA: nie
         ma literki „r”, tylko sam numer wersji.
 \end{itemize}
-\end{uwaga}
+
+% =====================================================================
+\section{Pamięć i równanie stanu: \texttt{use\_FreeEOS}}\label{sec:pamiec}
+
+\paragraph{Problem.} Na komputerach pracowni (8~GB RAM, system widzi 7,6~GiB) obliczenia
+zawieszały się przy kroku 10\,703, w~okolicy błysku helowego.
+
+\paragraph{Pomiar.} Zamiast zgadywać, 12~października 2026 zmierzyliśmy pamięć zajmowaną przez
+program \texttt{star} (RSS, co 5~s) w~trakcie całej ewolucji, na komputerze ze 128~GB RAM.
+Wystarczy do tego np.
+\begin{verbatim}
+grep VmRSS /proc/$(pgrep -n star)/status
+\end{verbatim}
+Wynik jest na rysunku~\ref{fig:pamiec} (niebieska linia). Pamięć rośnie skokami do 7,2~GiB już
+przed ciągiem głównym (ok.~600.~model), potem do 7,5~GiB przy zapłonie helu w~jądrze i do 7,8~GiB
+przy późnym błysku w~warstwie helowej. To więcej, niż ma komputer na pracowni, nawet bez systemu.
+Do kroku 10\,703 obliczenia szły najprawdopodobniej dzięki pamięci wymiany (swap).
+
+Liczba wątków nie ma znaczenia (4 i~24 wątki: ta sama pamięć w~tych samych modelach), wykresy
+pgstar zajmują ok.~0,1~GiB. Dlatego wyłączanie wykresów czy zmniejszanie liczby wątków nie pomaga.
+
+\paragraph{Przyczyna.} Które pliki program czyta w~chwili skoku pamięci, pokazuje
+\begin{verbatim}
+strace -f -e trace=openat -p $(pgrep -n star)
+\end{verbatim}
+Każdy skok to wczytanie kolejnych tablic równania stanu FreeEOS, czyli plików z~katalogu
+\verb!$MESA_DIR/data/eosFreeEOS_data!. Jedna tablica zajmuje w~pamięci 128~MB, a~tablic jest
+89 (różne zawartości wodoru $X$ i~metali $Z$), razem ok.~11~GB. MESA wczytuje je w~miarę
+potrzeby i~już nie zwalnia.
+
+\paragraph{Rozwiązanie.} W~sekcji \verb!&eos! pliku \texttt{inlist}:
+\begin{verbatim}
+  use_FreeEOS = .false.
+\end{verbatim}
+W~obszarze, który obejmowało FreeEOS, MESA używa wtedy tablic OPAL/SCVH (a~poza nimi HELM).
+Pamięć: najwyżej 2,7~GiB (pomarańczowa linia). Pełna ewolucja do białego karła przeszła z~pamięcią
+ograniczoną do 6~GiB, bez swapu. Tak można na własnym komputerze z~Linuksem sprawdzić, czy
+obliczenia zmieszczą się w~mniejszej pamięci, bez maszyny wirtualnej:
+\begin{verbatim}
+systemd-run --user --scope -p MemoryMax=6G -p MemorySwapMax=0 ./rn
+\end{verbatim}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{mem.png}
+\caption{Pamięć programu \texttt{star} w~trakcie ewolucji. Niebieski: z~FreeEOS (do 12~października
+2026), pomarańczowy: \texttt{use\_FreeEOS = .false.}. Dolny panel: liczba stref modelu.}
+\label{fig:pamiec}
+\end{figure}
+
+\paragraph{Uwaga.} Tablice OPAL w~MESA są tylko dla $Z \le 0{,}04$. Przy większej metaliczności
+(\verb!initial_z!) bez FreeEOS zostaje równanie stanu HELM, które zakłada pełną jonizację. Wtedy
+trzeba wrócić do \verb!use_FreeEOS = .true.! (i~komputera z~16~GB RAM).
+
+\paragraph{Zadanie.} Na komputerze z~co najmniej 16~GB RAM uruchom przykład w~osobnym katalogu
+z~\verb!use_FreeEOS = .true.! i~porównaj z~wynikiem domyślnym: diagram H-R, wiek na końcu ciągu
+głównego i~na szczycie gałęzi czerwonych olbrzymów, masa jądra helowego, masa białego karła,
+liczba kroków i~powtórzeń. Co się zmienia, a~co nie? Dlaczego?
 
 % =====================================================================
 \section{Animacje}\label{sec:anim}
 
-Z plików w katalogu \code{png} można utworzyć film programem \code{ffmpeg} (w Linuksie jest
-częścią MESA SDK). Każdy typ wykresu ma własne pliki: \code{HR\_*}, \code{Kippenhahn\_*},
-\code{abund\_*}, \code{power\_*}, \code{trho\_profile\_*}, \code{Summary\_Burn\_*}. Film robimy
-z~jednego typu, np.~diagramu H-R (wzorzec \verb!png/*.png! skleiłby wszystkie typy jeden po drugim):
-\begin{sh}
+Z plików w katalogu \texttt{png} można utworzyć film programem \texttt{ffmpeg} (w Linuksie jest
+częścią MESA SDK). Każdy typ wykresu ma własne pliki: \texttt{HR\_*}, \texttt{Kippenhahn\_*},
+\texttt{abund\_*}, \texttt{power\_*}, \texttt{trho\_profile\_*}, \texttt{Summary\_Burn\_*}. Film
+robimy z~jednego typu, np.~diagramu H-R (wzorzec \verb!png/*.png! skleiłby wszystkie typy jeden po
+drugim):
+\begin{verbatim}
 # film AVI
 ffmpeg -f image2 -pattern_type glob -i 'png/HR_*.png' -c:v libx264 -preset slow \
   -crf 20 -pix_fmt yuv420p -aspect 16:9 -vf "scale=1920:-1" -r 25 HR.avi
@@ -463,35 +488,42 @@ ffmpeg -y -f image2 -thread_queue_size 256 -pattern_type glob -i 'png/HR_*.png' 
 ffmpeg -y -f image2 -thread_queue_size 256 -pattern_type glob -i 'png/HR_*.png' \
   -i /tmp/palette.png \
   -lavfi "scale=1600:-1:flags=lanczos [x]; [x][1:v] paletteuse" HR.gif
-\end{sh}
-Skrypt \verb!./parallel_movie_encode.sh! tworzy równolegle (też programem \code{ffmpeg}) osobny
-film AVI dla każdego typu wykresu, który jest w katalogu \code{png}.
+\end{verbatim}
+Skrypt \verb!./parallel_movie_encode.sh! tworzy równolegle (też programem \texttt{ffmpeg}) osobny
+film AVI dla każdego typu wykresu, który jest w katalogu \texttt{png}.
 
 % =====================================================================
 \section{Tabela benchmarków}\label{sec:bench}
 
 Czas obliczeń testowego modelu (w minutach) na różnych komputerach i przy różnej liczbie wątków
-\code{OMP\_NUM\_THREADS}. Czas jest podany w końcowych linijkach wydruku:
-\code{runtime (minutes), retries, steps}.
+\texttt{OMP\_NUM\_THREADS}. Czas jest podany w końcowych linijkach wydruku:
+\texttt{runtime (minutes), retries, steps}. Czasy w~tabeli zmierzono przed 12~października 2026,
+z~FreeEOS (303 powtórzenia, 14\,122 kroki). Bez FreeEOS kroków jest ok.~6\% więcej:
+Intel Core Ultra 9 285K, Ubuntu 24.04, 24~wątki: pomiar w toku (491 powtórzeń, 14\,986 kroków).
 
-{\small
-\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.36\textwidth}>{\raggedright\arraybackslash}p{0.58\textwidth}@{}}
+\begin{small}
+\begin{tabular}{p{0.36\textwidth}p{0.58\textwidth}}
 \toprule
 \textbf{Komputer} & \textbf{wątki: czas [min]} \\
 \midrule
-\endhead
 MacBook M3 Max & 1: 747,52; 2: 391,84; 5: 181,67; 6: 160,08; 7: 144,87; 8: 134,33; 9: 123,51; 10: 113,25 \\
 VMware & 4: 157,74 \\
 Pracownia OA Fort (Cep, Aqr, Eri, Sgr, Hya) & 4: zawiesił się \\
 Intel Core Ultra 9 285K, 128 GB RAM, Windows 11, WSL2 & 1: 411,39; 2: 220,32; 3: 155,52; 4: 120,57; 5: 99,37; 6: 85,45; 8: 70,12; 24: 42,39 \\
+Intel Core Ultra 9 285K, 128 GB RAM, Ubuntu 24.04 & 24: 55,19 \\
 Super Micro, 2× Intel Xeon Gold 6238R 2,2 GHz (2×26 rdzeni), 376 GB RAM, Ubuntu 22.04 & 1: 732,24; 2: 397,55; 3: 283,02; 4: 223,56; 5: 184,39; 6: 161,15; 7: 143,23; 8: 129,57; 9: 118,77; 10: 109,70; 24: 67,23 \\
 AMD Ryzen 7 7435HS 3,1 GHz, 16 GB RAM, Windows 11, WSL2 & 2: 393,79; 4: 198,33; 8: 152,86 \\
 MacBook Air M4, 16 GB RAM & 2: nie skończył przez całe zajęcia \\
 Intel i7-4770K 3,4 GHz, 16 GB RAM, Ubuntu & 1: 783,99; 2: 420,83; 3: 308,45; 4: 246,79; 5: 237,08; 6: 227,10; 7: 218,53; 8: 210,82 \\
 AMD Ryzen 9 5900X, 32 GB RAM, Windows 11 natywnie (gfortran 16.1 MinGW) & 12: 70,77 \\
 \bottomrule
-\end{longtable}
-}
+\end{tabular}
+\end{small}
+
+\texttt{OMP\_NUM\_THREADS} nie powinno być większe niż liczba wolnych rdzeni. Pomiar z~12~października
+2026 (Intel Core Ultra 9 285K, 24~rdzenie, 24~wątki): gdy 4~rdzenie zajmował drugi rachunek MESA,
+obliczenia szły 0,34~modelu na sekundę, a~po jego zatrzymaniu 3,58~modelu na sekundę, czyli
+10~razy szybciej.
 
 % =====================================================================
 \appendix
@@ -499,102 +531,107 @@ AMD Ryzen 9 5900X, 32 GB RAM, Windows 11 natywnie (gfortran 16.1 MinGW) & 12: 70
 
 Sprawdzone 6--7~października 2026: Windows~11, AMD Ryzen~9 5900X, 32~GB RAM, gfortran 16.1.0
 (MSYS2), HDF5 2.1.1. Ograniczenia: brak wykresów pgstar (MESA zbudowana bez PGPLOT,
-\code{pgstar\_flag} jest ignorowane), nie są budowane GYRE, ADIPLS, \code{binary} i \code{astero},
-wyniki nie są identyczne bit w bit z~Linuksem (różnice na poziomie zaokrągleń).
+\texttt{pgstar\_flag} jest ignorowane), nie są budowane GYRE, ADIPLS, \texttt{binary} i
+\texttt{astero}, wyniki nie są identyczne bit w bit z~Linuksem (różnice na poziomie zaokrągleń).
 
 \subsection{Testy modułów (opcjonalnie)}
 
 Po instalacji MESA, w oknie z ustawionymi zmiennymi (kilkanaście minut):
-\begin{ps}
+\begin{verbatim}
 C:\MESA\MESA-minimal-test-1MSun-star\windows\test_mesa.ps1
-\end{ps}
-Wyniki są porównywane z wzorcami z Linuksa (tolerancja $10^{-8}$). Oczekiwane: \code{OK} wszędzie
-oprócz \code{num} (całkowanie sztywnych równań różniczkowych wzmacnia różnice zaokrągleń do
-$10^{-5}$) i \code{net} (jedna linia, różnica $5\cdot10^{-7}$).
+\end{verbatim}
+Wyniki są porównywane z wzorcami z Linuksa (tolerancja $10^{-8}$). Oczekiwane: \texttt{OK} wszędzie
+oprócz \texttt{num} (całkowanie sztywnych równań różniczkowych wzmacnia różnice zaokrągleń do
+$10^{-5}$) i \texttt{net} (jedna linia, różnica $5\cdot10^{-7}$).
 
 \subsection{Parametry \texttt{mesa\_env.ps1}}
 
-\code{-MesaDir} (inne położenie MESA niż katalog obok repozytorium), \code{-Threads}
-(liczba wątków, domyślnie liczba rdzeni), \code{-Toolchain} (MSYS2 w innym miejscu niż
+\texttt{-MesaDir} (inne położenie MESA niż katalog obok repozytorium), \texttt{-Threads}
+(liczba wątków, domyślnie liczba rdzeni), \texttt{-Toolchain} (MSYS2 w innym miejscu niż
 \verb!C:\msys64!).
 
 \subsection{Co zmieniono względem instalacji na Linuksie}
 
-\begin{enumerate}[leftmargin=1.5em, itemsep=0.4em]
+\begin{enumerate}
 \item \textbf{System budowania.} Moduły są kompilowane oryginalnymi makefile'ami MESA, uruchamianymi
-  natywnym \code{mingw32-make.exe} (receptury wykonuje \code{cmd.exe}), z plikiem
+  natywnym \texttt{mingw32-make.exe} (receptury wykonuje \texttt{cmd.exe}), z plikiem
   \verb!utils\makefile_header! w wersji dla Windows. Narzędzia z~MESA SDK zastąpiono skryptami
-  PowerShell (\code{makedepf90.ps1}, \code{cp\_if\_newer.ps1}), a bashowe \code{install}
-  i~\code{build\_data\_and\_export} skryptem \code{install\_mesa.ps1}. Biblioteka forum (z GYRE)
-  jest preprocesowana programem \code{fypp}. LAPACK/BLAS pochodzą ze źródeł w~\code{mesa/mtx},
+  PowerShell (\texttt{makedepf90.ps1}, \texttt{cp\_if\_newer.ps1}), a bashowe \texttt{install}
+  i~\texttt{build\_data\_and\_export} skryptem \texttt{install\_mesa.ps1}. Biblioteka forum (z GYRE)
+  jest preprocesowana programem \texttt{fypp}. LAPACK/BLAS pochodzą ze źródeł w~\texttt{mesa/mtx},
   HDF5 z~MSYS2 (linkowana statycznie). GYRE jest zastąpione stubem.
 \item \textbf{Plik C} \verb!utils\private\utils_c_system.c! używa funkcji POSIX, których MinGW nie
-  ma w tej postaci (\code{mkdir(path, mode)}, \code{realpath}, brak \code{O\_BINARY}). Łata jest
-  ujęta w \verb!#ifdef _WIN32!.
+  ma w tej postaci (\texttt{mkdir(path, mode)}, \texttt{realpath}, brak \texttt{O\_BINARY}). Łata
+  jest ujęta w \verb!#ifdef _WIN32!.
 \item \textbf{Błąd ustawień regionalnych w libgfortran (MinGW/UCRT).} Wokół każdej instrukcji
   wejścia-wyjścia libgfortran przełącza locale na „C”, po czym „przywraca” poprzednie wskaźnikiem
   do już zwolnionej pamięci. Proces przechodzi wtedy na locale użytkownika
-  (\code{Polish\_Poland.1250}, przecinek dziesiętny). W wątkach OpenMP liczba „0.6000” jest
-  odczytywana jako 0 i MESA przerywa wczytywanie tablic EOS (\code{bad header info}). Na Windows
+  (\texttt{Polish\_Poland.1250}, przecinek dziesiętny). W wątkach OpenMP liczba „0.6000” jest
+  odczytywana jako 0 i MESA przerywa wczytywanie tablic EOS (\texttt{bad header info}). Na Windows
   z angielskimi ustawieniami regionalnymi błąd się nie ujawnia. Poprawka:
-  \code{mesa\_win\_locale.c} przechwytuje \code{setlocale}
+  \texttt{mesa\_win\_locale.c} przechwytuje \texttt{setlocale}
   (\verb!-Wl,--wrap=__imp_setlocale!, libgfortran statycznie) i utrzymuje locale „C”. Przy okazji
-  odczyt plików tekstowych jest ok.~2 razy szybszy. \code{libgomp} i \code{libwinpthread} pozostają
-  dynamiczne, bo wersja w pełni statyczna czytała pliki ok.~2,5 razy wolniej.
+  odczyt plików tekstowych jest ok.~2 razy szybszy. \texttt{libgomp} i \texttt{libwinpthread}
+  pozostają dynamiczne, bo wersja w pełni statyczna czytała pliki ok.~2,5 razy wolniej.
 \item \textbf{Stos.} Windows daje głównemu wątkowi 2~MB stosu (Linux: 8~MB lub
-  \code{ulimit -s unlimited}). \code{star.exe} jest linkowany z rezerwacją 1~GB
-  (\verb!-Wl,--stack,1073741824!), a~wątkom OpenMP \code{mesa\_env.ps1} ustawia
-  \code{OMP\_STACKSIZE=512M}.
-\item \textbf{Błąd w MESA ujawniany przez gfortran $\geq$ 15.} W \verb!mtx\public\mtx_solve_routines.inc!
-  (dołączanym do solvera \verb!star\private\star_bcyclic.f90!) pętle zamiany elementów według
-  pivotów mają dyrektywę \verb+!$omp simd+, choć ich iteracje nie są niezależne. To niezdefiniowane
-  zachowanie: z nowymi kompilatorami już pierwsza iteracja Newtona jest rozbieżna (\code{sizeB}),
-  nawet przy starcie z modelu ZAMS. Błąd jest znany autorom (lista mesa-users, marzec 2026, MESA SDK
-  26.3.1 z gfortran 15.2) i poprawiony w repozytorium MESA (commit \code{03ef2a5}, luty 2026).
-  \code{install\_mesa.ps1} nakłada tę poprawkę (usuwa trzy linie) przed kompilacją.
-\item \textbf{Drobiazgi.} W \verb!chem\make\makefile_base! usunięto \verb!-m %m.mod! (\code{cmd.exe}
-  traktuje \verb!%m! jak zmienną). Dowiązanie \code{pgstar.f90} zastępuje kopia
-  \code{pgstar\_stub.f90}. \code{star.exe} potrzebuje \code{libgomp-1.dll}
-  i~\code{libwinpthread-1.dll} z~\verb!C:\msys64\ucrt64\bin! (dodaje je do \code{PATH}
-  \code{mesa\_env.ps1}).
+  \texttt{ulimit -s unlimited}). \texttt{star.exe} jest linkowany z rezerwacją 1~GB
+  (\verb!-Wl,--stack,1073741824!), a~wątkom OpenMP \texttt{mesa\_env.ps1} ustawia
+  \texttt{OMP\_STACKSIZE=512M}.
+\item \textbf{Błąd w MESA ujawniany przez gfortran $\geq$ 15.} Pętle zamiany elementów według
+  pivotów mają dyrektywę \verb+!$omp simd+, choć ich iteracje nie są niezależne (plik
+  \verb!mtx\public\mtx_solve_routines.inc!, dołączany do solvera
+  \verb!star\private\star_bcyclic.f90!). To niezdefiniowane zachowanie: z nowymi
+  kompilatorami już pierwsza iteracja Newtona jest rozbieżna (\texttt{sizeB}), nawet przy starcie
+  z modelu ZAMS. Błąd jest znany autorom (lista mesa-users, marzec 2026, MESA SDK 26.3.1 z gfortran
+  15.2) i poprawiony w repozytorium MESA (commit \texttt{03ef2a5}, luty 2026).
+  \texttt{install\_mesa.ps1} nakłada tę poprawkę (usuwa trzy linie) przed kompilacją.
+\item \textbf{Drobiazgi.} W \verb!chem\make\makefile_base! usunięto \verb!-m %m.mod!
+  (\texttt{cmd.exe} traktuje \verb!%m! jak zmienną). Dowiązanie \texttt{pgstar.f90} zastępuje kopia
+  \texttt{pgstar\_stub.f90}. \texttt{star.exe} potrzebuje \texttt{libgomp-1.dll}
+  i~\texttt{libwinpthread-1.dll} z~\verb!C:\msys64\ucrt64\bin! (dodaje je do \texttt{PATH}
+  \texttt{mesa\_env.ps1}).
 \end{enumerate}
 
 \subsection{Rozwiązywanie problemów}
 
-\begin{description}[style=nextline, leftmargin=1.2em, itemsep=0.3em]
-\item[\code{MESA\_DIR is not set}, \code{mingw32-make} nie jest rozpoznawane, okno „nie znaleziono
-      libgomp-1.dll”]
-  W tym oknie nie wykonano \verb!. ...\windows\mesa_env.ps1! (z kropką na początku). MSYS2 w~innym
-  miejscu niż \verb!C:\msys64!: parametr \verb!-Toolchain D:/msys64/ucrt64!.
+\begin{description}
+\item[Brak zmiennych środowiskowych] Komunikaty \texttt{MESA\_DIR is not set},
+  \texttt{mingw32-make} nie jest rozpoznawane albo okno „nie znaleziono libgomp-1.dll”: w tym oknie
+  nie wykonano \verb!. ...\windows\mesa_env.ps1!
+  (z kropką na początku). MSYS2 w~innym miejscu niż \verb!C:\msys64!: parametr
+  \verb!-Toolchain D:/msys64/ucrt64!.
 \item[Skrypty są blokowane („running scripts is disabled on this system”)]
-\begin{ps}
+  Jednorazowo zezwalamy na skrypty:
+\begin{verbatim}
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-\end{ps}
-\item[\code{pacman}: błędy pobierania pakietów (404, \code{failed retrieving file})]
+\end{verbatim}
+\item[\texttt{pacman}: błędy pobierania pakietów (404, \texttt{failed retrieving file})]
   Nieaktualna baza pakietów: \verb!C:\msys64\usr\bin\pacman.exe -Syu --noconfirm! i ponowna
   instalacja.
-\item[\code{tar}: \code{Error opening archive} przy pliku \code{.zip}]
-  Przed systemowym \code{tar} w \code{PATH} jest GNU tar (z Git lub MSYS2). Pełna ścieżka:
+\item[\texttt{tar}: \texttt{Error opening archive} przy pliku \texttt{.zip}]
+  Przed systemowym \texttt{tar} w \texttt{PATH} jest GNU tar (z Git lub MSYS2). Pełna ścieżka:
   \verb!C:\Windows\System32\tar.exe -xf mesa-24.08.1.zip!.
-\item[\code{Python 3 not found}, otwiera się Microsoft Store]
+\item[\texttt{Python 3 not found}, otwiera się Microsoft Store]
   Zainstaluj Pythona i otwórz nowe okno PowerShell. Alias Sklepu można wyłączyć w~\emph{Ustawienia
   → Aplikacje → Zaawansowane ustawienia aplikacji → Aliasy wykonywania aplikacji}.
-\item[Rozbieżność już w pierwszym kroku (\code{correction rejected by sizeB})]
-  Kończy się komunikatem \code{dt < min\_timestep\_limit}. Objaw błędu z punktu~5, np.~gdy MESA
+\item[Rozbieżność już w pierwszym kroku (\texttt{correction rejected by sizeB})]
+  Kończy się komunikatem \texttt{dt < min\_timestep\_limit}. Objaw błędu z punktu~5, np.~gdy MESA
   była skompilowana bez poprawki. Przebuduj moduły i katalog roboczy:
-\begin{psw}
+\begin{footnotesize}
+\begin{verbatim}
 C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1 -Modules mtx,net,star -Clean
 ./clean
 ./mk
-\end{psw}
-\item[\code{bad header info in ...eosFreeEOS\_data...}]
-  Objaw błędu z punktu~3. Usuń pliki cache zapisane przez wadliwy program i zbuduj \code{star.exe}
-  ponownie (\verb!./clean!, \verb!./mk!):
-\begin{ps}
+\end{verbatim}
+\end{footnotesize}
+\item[\texttt{bad header info in ...eosFreeEOS\_data...}]
+  Objaw błędu z punktu~3. Usuń pliki cache zapisane przez wadliwy program i zbuduj
+  \texttt{star.exe} ponownie (\verb!./clean!, \verb!./mk!):
+\begin{verbatim}
 Remove-Item C:\MESA\mesa-24.08.1\data\*\cache\*.bin
-\end{ps}
-\item[\code{star.exe} kończy się natychmiast, bez komunikatów (kod \code{0xC00000FD})]
-  Przepełnienie stosu (punkt~4): ponownie \code{install\_mesa.ps1}, potem \verb!./clean!,
+\end{verbatim}
+\item[\texttt{star.exe} kończy się natychmiast, bez komunikatów (kod \texttt{0xC00000FD})]
+  Przepełnienie stosu (punkt~4): ponownie \texttt{install\_mesa.ps1}, potem \verb!./clean!,
   \verb!./mk!.
 \item[Pierwsze uruchomienie jest bardzo wolne]
   Tworzenie plików cache (jednorazowo). Rozpakowywanie i kompilację spowalnia też antywirus.
@@ -603,22 +640,24 @@ Remove-Item C:\MESA\mesa-24.08.1\data\*\cache\*.bin
 
 \subsection{Zawartość katalogu \texttt{windows}}
 
-\begin{center}\small
-\begin{tabular}{@{}l>{\raggedright\arraybackslash}p{0.55\textwidth}@{}}
+\begin{center}
+\begin{small}
+\begin{tabular}{ll}
 \toprule
 \textbf{Plik} & \textbf{Rola / odpowiednik na Linuksie} \\
 \midrule
-\code{mesa\_env.ps1} & \code{export MESA\_DIR=...}, \code{source mesasdk\_init.sh} \\
-\code{install\_mesa.ps1} & \code{./install} \\
-\code{test\_mesa.ps1} & testy modułów (\code{build\_and\_test}) \\
-\code{makefile\_header} & \code{utils/makefile\_header} dla Windows \\
-\code{forum\_makefile} & kompilacja biblioteki forum \\
-\code{tools\textbackslash makedepf90.ps1} & \code{makedepf90} z MESA SDK \\
-\code{tools\textbackslash cp\_if\_newer.ps1} & \code{utils/cp\_if\_newer} \\
-\code{tools\textbackslash mesa\_win\_locale.c} & poprawka locale (punkt~3) \\
-\code{..\textbackslash mk.ps1, rn.ps1, re.ps1, clean.ps1} & \code{./mk}, \code{./rn}, \code{./re}, \code{./clean} \\
+\verb!mesa_env.ps1! & \verb!export MESA_DIR=...!, \verb!source mesasdk_init.sh! \\
+\verb!install_mesa.ps1! & \verb!./install! \\
+\verb!test_mesa.ps1! & testy modułów (\verb!build_and_test!) \\
+\verb!makefile_header! & \verb!utils/makefile_header! dla Windows \\
+\verb!forum_makefile! & kompilacja biblioteki forum \\
+\verb!tools\makedepf90.ps1! & \verb!makedepf90! z MESA SDK \\
+\verb!tools\cp_if_newer.ps1! & \verb!utils/cp_if_newer! \\
+\verb!tools\mesa_win_locale.c! & poprawka locale (punkt~3) \\
+\verb!..\mk.ps1, rn.ps1, re.ps1, clean.ps1! & \verb!./mk!, \verb!./rn!, \verb!./re!, \verb!./clean! \\
 \bottomrule
 \end{tabular}
+\end{small}
 \end{center}
 
 \end{document}

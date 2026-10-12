@@ -1,6 +1,12 @@
+2026-10-12: Instrukcja w zwykłym LaTeX-u: bez własnych makr, przełączników i ramek (verbatim zamiast
+listings, bez tcolorbox), uwagi „do sprawdzenia” jako zwykły tekst. Nowy rozdział „Pamięć i równanie
+stanu: use_FreeEOS” (pomiar pamięci, przyczyna, rozwiązanie, zadanie: porównanie z FreeEOS),
+wykres doc/mem.png. Uaktualnione: wymagania, pracownia, wynik pełnej ewolucji (491 powtórzeń,
+14986 kroków), benchmarki (czasy z FreeEOS), uwaga o liczbie wątków.
+
 2026-10-12: W sekcji &eos dodano ustawienie use_FreeEOS = .false. aby zredukować potrzebną ilość pamięci. 
 To powinno pozwolić na bezproblemowe przejście całego rachunku na komputerze który nie spełnia minimalnych wymogów
-MESA, czyli poniżej 8GB RAM. Skutkiem ubocznym jest niewielka zamiana na diagramie HR. 
+MESA, czyli poniżej 8GB RAM. Skutkiem ubocznym jest niewielka zmiana na diagramie HR. 
 
 2026-10-12: Instrukcja: git i unzip w apt install (Linux, WSL), działający link do strony MESA SDK
 (macOS), uwaga o wersji SDK (od 26.3 gcc 15.2, MESA 24.08.1 się rozbiega), filmy ffmpeg z jednego
