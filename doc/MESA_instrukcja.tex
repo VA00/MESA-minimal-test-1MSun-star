@@ -17,29 +17,29 @@
 \title{Instalacja i minimalny przykład komputerowej ewolucji gwiazdy w~programie MESA\\[0.3em]
   \Large Linux, macOS, Windows (WSL i natywnie)}
 \author{Andrzej Odrzywołek\\ \small\href{mailto:andrzej.odrzywolek@uj.edu.pl}{andrzej.odrzywolek@uj.edu.pl}}
-\date{wersja robocza, 12~października 2026}
+\date{12~października 2026}
 
 \begin{document}
 \sloppy  % dlugie nazwy w \texttt nie dziela sie, wiec luzniejsze wiersze zamiast wystawania na margines
 \maketitle
 
-Instrukcja i wszystkie potrzebne pliki znajdują się w repozytorium\\
-\url{https://github.com/VA00/MESA-minimal-test-1MSun-star}
+%Instrukcja i wszystkie potrzebne pliki znajdują się w repozytorium \url{https://github.com/VA00/MESA-minimal-test-1MSun-star}
 
-Przykład to absolutnie minimalna konfiguracja MESA r24.08.1: ewolucja gwiazdy o masie
+Przykład to absolutnie minimalna konfiguracja MESA r24.08.1 dla ewolucji gwiazdy o masie
 $1\,M_\odot$ od jednorodnego obłoku H/He (pre-MS) do stygnącego białego karła, ok.~15\,000 kroków.
-Obliczenia trwają od ok.~1~godziny (szybki komputer) do kilku godzin.
+Obliczenia trwają od poniżej 1~godziny (szybki komputer) do kilku godzin.
 
-Którą część czytać?
+\textbf{Od czego zacząć:}
+
+
 \begin{itemize}
   \item Pracownia komputerowa Fort OA (MESA już zainstalowana): rozdział~\ref{sec:pracownia}.
-  \item Własny komputer z Linuksem: rozdział~\ref{sec:linux}.
+  \item Własny komputer z Linuksem: rozdział~\ref{sec:linux}. Działa także w maszynie wirtualnej, np. VMWare Workstation pod Windows. 
   \item Mac z procesorem Apple Silicon (M1--M4): rozdział~\ref{sec:mac}.
   \item Windows: \textbf{zalecane} WSL (pełna funkcjonalność, z wykresami), rozdział~\ref{sec:wsl}.
         Bez WSL: wersja natywna (eksperymentalna, na razie bez wykresów), rozdział~\ref{sec:win}.
 \end{itemize}
-Potem: uruchomienie przykładu (rozdział~\ref{sec:run}), pamięć i równanie stanu (\ref{sec:pamiec}),
-animacje (\ref{sec:anim}) i tabela benchmarków (\ref{sec:bench}).
+
 
 \tableofcontents
 
@@ -47,41 +47,45 @@ animacje (\ref{sec:anim}) i tabela benchmarków (\ref{sec:bench}).
 \section{Wymagania}\label{sec:wymagania}
 
 \begin{itemize}
-  \item Dysk: pełna instalacja MESA to ok.~21~GB, MESA SDK ok.~0,7~GB.
-  \item Pamięć: 8~GB RAM wystarcza. Od 12~października 2026 przykład zajmuje najwyżej ok.~2,7~GiB,
-  bo w~pliku \texttt{inlist} jest \verb!use_FreeEOS = .false.! (rozdział~\ref{sec:pamiec}).
-  Wcześniej sam program zajmował do 7,8~GiB i na komputerach z~8~GB obliczenia się zawieszały.
+  \item Dysk: pełna instalacja MESA to ok.~21~GB, MESA SDK ok.~0.7~GB.
+  \item Pamięć: 8~GB RAM to minimalne oficjalne wymagania. Jeżeli w~pliku \texttt{inlist} ustawimy \verb#use_FreeEOS = .false.# (od 12~października 2026 ustawienie domyślne) obliczenia zajmują najwyżej ok.~2.7~GiB (rozdział~\ref{sec:pamiec}).
+  Wcześniej sam program zajmował do 7.8~GiB i na komputerach pracownianych z~7.6~GiB obliczenia się zawieszały.
   \item Ścieżki do katalogów z MESA \textbf{nie mogą zawierać spacji}.
   \item MESA SDK \textbf{dokładnie w podanej wersji} (Linux, WSL: 24.7.1; macOS: 25.8.1), nie
-  najnowszej. SDK od wersji 26.3 ma kompilator gcc 15.2, z którym MESA 24.08.1 rozbiega się już
-  w pierwszym kroku (dodatek~\ref{app:win}, punkt~5).
+  najnowszej. 
+  
+  
+  \textbf{UWAGA:} \textit{PSDK od wersji 26.3 ma kompilator gcc 15.2, z którym MESA 24.08.1 rozbiega się już
+  w pierwszym kroku (dodatek~\ref{app:win}, punkt~5).}
 \end{itemize}
 
 % =====================================================================
 \section{Pracownia komputerowa Fort OA}\label{sec:pracownia}
 
 MESA jest zainstalowana systemowo w~\verb!/opt/MESA!. Wystarczającą ilość pamięci powyżej 8~GB mają
-w~tej chwili komputery: Cep, Aqr, Eri, Sgr, Hya. Po zmianie z~12~października 2026
-(rozdział~\ref{sec:pamiec}) przykład powinien działać na wszystkich komputerach pracowni, ale nie
-zostało to jeszcze sprawdzone na pracowni.
+w~tej chwili komputery: Cep, Aqr, Eri, Sgr, Hya. 
+
+
+\textbf{TODO:} \textit{sprawdzić, czy po zmianie z~12~października 2026
+(rozdział~\ref{sec:pamiec}) przykład działa na wszystkich komputerach pracowni.}
 
 \begin{enumerate}
-\item Zmienne środowiskowe dla MESA SDK i programu MESA:
+\item W konsoli Linuxowej ustawiamy z linii komend zmienne środowiskowe dla MESA SDK i~programu MESA:
 \begin{verbatim}
 export MESASDK_ROOT=/opt/MESA/mesasdk
 source $MESASDK_ROOT/bin/mesasdk_init.sh
 export MESA_DIR=/opt/MESA/mesa-24.08.1
 \end{verbatim}
 \item Aby uniknąć problemów z zapisem plików cache (eos -- równanie stanu, kap --
-  nieprzezroczystość, rates -- reakcje jądrowe, ionization -- jonizacja), tworzymy własny katalog
+  nieprzezroczystość, rates -- reakcje jądrowe, ionization -- jonizacja), tworzymy własny katalog (tylko za pierwszym razem)
   i ustawiamy zmienną \texttt{MESA\_CACHES\_DIR}:
 \begin{verbatim}
 mkdir -p $HOME/.mesa
 export MESA_CACHES_DIR=$HOME/.mesa
 \end{verbatim}
 \item Pracujemy w katalogu \verb!/data/rok4! (zamień \texttt{rok4} na swój rocznik). Testy pokazują,
-  że symulacja działa tam ok.~3 razy szybciej niż w~katalogu \verb!$HOME!, ale wyniki nie są
-  dostępne na innych komputerach.
+  że symulacja działa tam ok.~3 razy szybciej niż w~katalogu \verb#$HOME#, ale wyniki nie są
+  dostępne na innych komputerach. Praca w katalogu domowym jest możliwa, program po prostu działa wolniej, ale za to wyniki są od razu dostępne na wszystkich stanowiskach pracowni komputerowej.   
 \begin{verbatim}
 cd /data/rok4
 mkdir MESA2027
@@ -93,7 +97,7 @@ cd MESA-minimal-test-1MSun-star
 \end{enumerate}
 
 \paragraph{Znany problem.} Na komputerach pracowni obliczenia zawieszały się przy kroku 10\,703
-(okolice błysku helowego). Przyczyna i rozwiązanie: rozdział~\ref{sec:pamiec}.
+(okolice błysku helowego). TODO: Prawdopodobna przyczyna i rozwiązanie: rozdział~\ref{sec:pamiec}.
 
 \paragraph{Zadanie.} Proszę powtórzyć testowy run w katalogach \verb!/data/rok4! oraz \verb!$HOME!
 i podać konkretne wartości czasu obliczeń.
@@ -240,8 +244,7 @@ przypisać symulację do wybranych rdzeni poleceniem \texttt{taskset}. Jak zrobi
 % =====================================================================
 \section{Windows -- WSL (zalecane)}\label{sec:wsl}
 
-Ten rozdział jest przygotowany na podstawie dokumentacji WSL. Na komputerze, na którym testowano
-wersję dla Windows, nie było WSL, więc te kroki nie zostały jeszcze sprawdzone.
+TODO: co to za brednie? 
 
 \begin{enumerate}
 \item W PowerShell \textbf{uruchomionym jako administrator}, potem restart komputera:
@@ -273,7 +276,7 @@ sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget git
 Wersja natywna nie wyświetla wykresów (pgstar). Wszystkie polecenia wpisujemy w~PowerShell~7.
 
 \begin{enumerate}
-\item Instalujemy PowerShell~7:
+\item Instalujemy PowerShell~7, jeżeli ktoś jeszcze go nie ma:
 \begin{verbatim}
 winget install --id Microsoft.PowerShell -e
 \end{verbatim}
@@ -329,7 +332,7 @@ Dalej jak w rozdziale~\ref{sec:run}.
 % =====================================================================
 \section{Uruchomienie przykładu (wszystkie systemy)}\label{sec:run}
 
-\subsection{Polecenia}
+\subsection{Komendy programu MESA}
 
 \begin{center}
 \begin{tabular}{ll}
@@ -342,7 +345,28 @@ sprzątanie kompilacji & \verb!./clean! \\
 \bottomrule
 \end{tabular}
 \end{center}
-Obliczenia przerywamy kombinacją \texttt{Ctrl+C}. Zdjęcia do restartów są w katalogu \texttt{photos}.
+Obliczenia przerywamy kombinacją \texttt{Ctrl+C}. Pliki restartu są w katalogu \texttt{photos}.
+
+\subsection{Pełna ewolucja}
+
+Po \verb!./rn! po kilku minutach pojawiają się okna z wizualizacją ewolucji gwiazdy. Typowy koniec obliczeń:
+\begin{verbatim}
+save photos/x986 for model 14986
+termination code: log_L_lower_limit
+
+                 runtime (minutes), retries, steps      ...         491     14986
+\end{verbatim}
+Czas obliczeń zależy od komputera, patrz rozdział~\ref{sec:bench}. Wyniki trafiają do katalogów
+\texttt{LOGS} (\texttt{history.data}, profile), \texttt{photos} (zdjęcia do restartów)
+i \texttt{png} (wykresy).
+
+W trakcie ewolucji możemy edytować plik \texttt{inlist.pgstar}, w szczególności dodawać i zmieniać różne tryby
+wizualizacji wnętrza gwiazdy.
+
+
+
+
+
 
 \subsection{Szybki test: 50 kroków od ciągu głównego}\label{sec:zams}
 
@@ -377,23 +401,6 @@ termination code: max_model_number
 Wynik sprawdzony w~Windows natywnie i w~Linuksie (także po zmianie z~12~października 2026),
 w~macOS jeszcze nie.
 
-\subsection{Pełna ewolucja}
-
-Po \verb!./rn! po kilku minutach pojawiają się okna z wizualizacją ewolucji gwiazdy (poza wersją
-natywną Windows). Koniec obliczeń:
-\begin{verbatim}
-save photos/x986 for model 14986
-termination code: log_L_lower_limit
-
-                 runtime (minutes), retries, steps      ...         491     14986
-\end{verbatim}
-(Ubuntu 24.04; czas obliczeń zależy od komputera, rozdział~\ref{sec:bench}). Do 12~października 2026, z~FreeEOS, było
-303~powtórzeń i 14\,122~kroki (rozdział~\ref{sec:pamiec}). Wyniki trafiają do katalogów
-\texttt{LOGS} (\texttt{history.data}, profile), \texttt{photos} (zdjęcia do restartów)
-i \texttt{png} (wykresy).
-
-W trakcie ewolucji możemy edytować plik \texttt{inlist.pgstar}, w szczególności dodawać różne sposoby
-wizualizacji.
 
 \paragraph{Znane problemy.}
 \begin{itemize}
@@ -410,12 +417,10 @@ extra_pgstar_inlist1_name   ->  extra_pgstar_inlist_name(1)
 % =====================================================================
 \section{Pamięć i równanie stanu: \texttt{use\_FreeEOS}}\label{sec:pamiec}
 
-\paragraph{Problem.} Na komputerach pracowni (8~GB RAM, system widzi 7,6~GiB) obliczenia
+\paragraph{Problem.} Na komputerach pracowni (8~GB RAM, system widzi 7.6~GiB) obliczenia
 zawieszały się przy kroku 10\,703, w~okolicy błysku helowego.
 
-\paragraph{Pomiar.} Zamiast zgadywać, 12~października 2026 zmierzyliśmy pamięć zajmowaną przez
-program \texttt{star} (RSS, co 5~s) w~trakcie całej ewolucji, na komputerze ze 128~GB RAM.
-Wystarczy do tego np.
+\paragraph{Pomiar zużycia pamięci.} Aby zmierzyć zużycie pamięci, używamy polecenia
 \begin{verbatim}
 grep VmRSS /proc/$(pgrep -n star)/status
 \end{verbatim}
