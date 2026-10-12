@@ -99,6 +99,9 @@ benchmarków (\ref{sec:bench}).
   \item Pamięć: minimum teoretycznie 8~GB RAM. W praktyce na pracowni na komputerach z 8GB obliczenia zajmujące 
   7.6 GB zawieszają się. 
   \item Ścieżki do katalogów z MESA \textbf{nie mogą zawierać spacji}.
+  \item MESA SDK \textbf{dokładnie w podanej wersji} (Linux, WSL: 24.7.1; macOS: 25.8.1), nie
+  najnowszej. SDK od wersji 26.3 ma kompilator gcc 15.2, z którym MESA 24.08.1 rozbiega się już
+  w pierwszym kroku (dodatek~\ref{app:win}, punkt~5).
 \end{itemize}
 
 % =====================================================================
@@ -173,9 +176,10 @@ mesasdk_init.sh: checking prerequisites
 mesasdk_init.sh: missing prerequisites:
   C shell Z library X11 library
 \end{out}
-  Doinstalowujemy je i powtarzamy krok~2 (\code{source ...}):
+  Doinstalowujemy je i powtarzamy krok~2 (\code{source ...}). Instalujemy też \code{git}
+  i~\code{unzip} (kroki 4 i~7), których może brakować w świeżej instalacji Ubuntu:
 \begin{sh}
-sudo apt install tcsh zlib1g-dev libx11-dev
+sudo apt install tcsh zlib1g-dev libx11-dev git unzip
 \end{sh}
 \item Rozpakowujemy MESA i ustawiamy kolejne zmienne (liczba wątków według liczby rdzeni):
 \begin{sh}
@@ -228,9 +232,9 @@ i ustawić \code{MESA\_DIR} oraz \code{MESASDK\_ROOT} na nowe położenie.
 Aktualizacja: 12 października 2025 (MESA SDK 25.8.1, MESA 24.08.1).
 
 \begin{enumerate}[leftmargin=1.5em, itemsep=0.6em]
-\item Pobieramy i instalujemy MESA SDK dla Apple Silicon, wersja 25.8.1 (sierpień 2025), z katalogu\\
-  {\small\url{http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/}}\\
-  plik \code{mesasdk-aarch64-macos-25.8.1.pkg}.
+\item Pobieramy i instalujemy MESA SDK dla Apple Silicon, wersja 25.8.1 (sierpień 2025), ze strony\\
+  {\small\url{http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk}}\\
+  plik \code{mesasdk-aarch64-macos-25.8.1.pkg} (nie najnowszy, rozdział~\ref{sec:wymagania}).
   Instalacja jest okienkowa, po kliknięciu na pobraną „paczkę”. SDK trafia do
   \verb!/Applications/mesasdk!. Starsza wersja 24.10.1 już nie działa.
 \item Zmienne środowiskowe (domyślna powłoka zsh jest zgodna z bash):
@@ -301,7 +305,7 @@ memory=12GB
 \item W oknie Ubuntu:
 \begin{sh}
 sudo apt update
-sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget
+sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget git
 \end{sh}
   i dalej według rozdziału~\ref{sec:linux}, w katalogu \verb!~/MESA! (\textbf{nie} w \verb!/mnt/c!).
 \end{enumerate}
@@ -440,25 +444,28 @@ wizualizacji.
 % =====================================================================
 \section{Animacje}\label{sec:anim}
 
-Z plików w katalogu \code{png} można utworzyć film programem \code{ffmpeg}:
+Z plików w katalogu \code{png} można utworzyć film programem \code{ffmpeg} (w Linuksie jest
+częścią MESA SDK). Każdy typ wykresu ma własne pliki: \code{HR\_*}, \code{Kippenhahn\_*},
+\code{abund\_*}, \code{power\_*}, \code{trho\_profile\_*}, \code{Summary\_Burn\_*}. Film robimy
+z~jednego typu, np.~diagramu H-R (wzorzec \verb!png/*.png! skleiłby wszystkie typy jeden po drugim):
 \begin{sh}
 # film AVI
-ffmpeg -f image2 -pattern_type glob -i 'png/*.png' -c:v libx264 -preset slow \
-  -crf 20 -pix_fmt yuv420p -aspect 16:9 -vf "scale=1920:-1" -r 25 movie.avi
+ffmpeg -f image2 -pattern_type glob -i 'png/HR_*.png' -c:v libx264 -preset slow \
+  -crf 20 -pix_fmt yuv420p -aspect 16:9 -vf "scale=1920:-1" -r 25 HR.avi
 
 # film MKV bezstratny
-ffmpeg -f image2 -pattern_type glob -i 'png/*.png' -c:v ffv1 -level 3 \
-  -pix_fmt yuv444p -aspect 16:9 -vf "scale=1200:-1" -r 25 movie.mkv
+ffmpeg -f image2 -pattern_type glob -i 'png/HR_*.png' -c:v ffv1 -level 3 \
+  -pix_fmt yuv444p -aspect 16:9 -vf "scale=1200:-1" -r 25 HR.mkv
 
 # animacja GIF
-ffmpeg -y -f image2 -thread_queue_size 256 -pattern_type glob -i 'png/*.png' \
+ffmpeg -y -f image2 -thread_queue_size 256 -pattern_type glob -i 'png/HR_*.png' \
   -vf "scale=800:-1:flags=lanczos,palettegen" /tmp/palette.png
-ffmpeg -y -f image2 -thread_queue_size 256 -pattern_type glob -i 'png/*.png' \
+ffmpeg -y -f image2 -thread_queue_size 256 -pattern_type glob -i 'png/HR_*.png' \
   -i /tmp/palette.png \
-  -lavfi "scale=1600:-1:flags=lanczos [x]; [x][1:v] paletteuse" movies.gif
+  -lavfi "scale=1600:-1:flags=lanczos [x]; [x][1:v] paletteuse" HR.gif
 \end{sh}
-Skrypt \verb!./parallel_movie_encode.sh! tworzy równolegle osobne animacje dla każdego typu
-wizualizacji.
+Skrypt \verb!./parallel_movie_encode.sh! tworzy równolegle (też programem \code{ffmpeg}) osobny
+film AVI dla każdego typu wykresu, który jest w katalogu \code{png}.
 
 % =====================================================================
 \section{Tabela benchmarków}\label{sec:bench}

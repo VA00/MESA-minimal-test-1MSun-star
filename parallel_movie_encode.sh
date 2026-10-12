@@ -1,13 +1,14 @@
 #!/bin/bash
+# Osobny film AVI dla kazdego typu wykresu z katalogu png/, wszystkie rownolegle.
+# ffmpeg jest czescia MESA SDK (po source $MESASDK_ROOT/bin/mesasdk_init.sh).
 dt=$(date '+%Y%m%d%H');
 echo "$dt"
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/trho_profile_*.png -ovc x264 -oac copy -o "trho_profile_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/Kippenhahn_*.png   -ovc x264 -oac copy -o "Kippenhahn_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/HR_*.png           -ovc x264 -oac copy -o "HR_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/Network_*.png      -ovc x264 -oac copy -o "Network_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/Summary_Burn_*.png -ovc x264 -oac copy -o "Summary_Burn_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/abund_*.png        -ovc x264 -oac copy -o "abund_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/power_*.png        -ovc x264 -oac copy -o "power_${dt}.avi" &
-mencoder -really-quiet -fps 60 -aspect 16/9 -mf type=png mf://png/track1_*.png       -ovc x264 -oac copy -o "track1_${dt}.avi" &
+for t in trho_profile Kippenhahn HR Network Summary_Burn abund power track1
+do
+    # wykresy wylaczone w inlist.pgstar nie maja plikow: pomijamy
+    compgen -G "png/${t}_*.png" > /dev/null || continue
+    ffmpeg -loglevel error -y -framerate 60 -f image2 -pattern_type glob -i "png/${t}_*.png" \
+        -c:v libx264 -crf 20 -pix_fmt yuv420p -aspect 16:9 "${t}_${dt}.avi" &
+done
 wait
 echo "Finished all"
