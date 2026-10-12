@@ -1,3 +1,7 @@
+2026-10-12: W sekcji &eos dodano ustawienie use_FreeEOS = .false. aby zredukować potrzebną ilość pamięci. 
+To powinno pozwolić na bezproblemowe przejście całego rachunku na komputerze który nie spełnia minimalnych wymogów
+MESA, czyli poniżej 8GB RAM. Skutkiem ubocznym jest niewielka zamiana na diagramie HR. 
+
 2026-10-12: Instrukcja: git i unzip w apt install (Linux, WSL), działający link do strony MESA SDK
 (macOS), uwaga o wersji SDK (od 26.3 gcc 15.2, MESA 24.08.1 się rozbiega), filmy ffmpeg z jednego
 typu wykresu (png/HR_*.png zamiast png/*.png). parallel_movie_encode.sh: ffmpeg z MESA SDK zamiast
