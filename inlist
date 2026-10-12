@@ -4,7 +4,7 @@
 &end
 
 &eos
-  !EMPTY SECTION
+  use_FreeEOS = .false.
 &end
 
 &kap
