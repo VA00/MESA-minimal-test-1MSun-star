@@ -13,7 +13,6 @@
 
   file_digits = 7
   !file_white_on_black_flag = .false.
-  pause = .false.    
   pgstar_report_writing_files = .false.
 
 

@@ -1,3 +1,11 @@
+2026-10-13: Usunięto z inlist.pgstar linię pause = .false. W MESA 26.x parametr nazywa się pause_flag
+i stara nazwa kończy obliczenia po pierwszym kroku błędem:
+
+Fortran runtime error: Cannot match namelist object name pause
+
+Wartość .false. jest domyślna, więc bez tej linii przykład działa zarówno z MESA 24.08.1, jak i 26.04.1.
+Sprawdzone na macOS (Apple Silicon M3 Max): MESA 26.04.1 + MESA SDK 26.6.1 (gcc 15.2).
+
 2026-10-12: Instrukcja w zwykłym LaTeX-u: bez własnych makr, przełączników i ramek (verbatim zamiast
 listings, bez tcolorbox), uwagi „do sprawdzenia” jako zwykły tekst. Nowy rozdział „Pamięć i równanie
 stanu: use_FreeEOS” (pomiar pamięci, przyczyna, rozwiązanie, zadanie: porównanie z FreeEOS),
