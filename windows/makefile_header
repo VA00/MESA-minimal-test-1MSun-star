@@ -39,14 +39,12 @@ ifeq ($(USE_CRMATH),YES)
 LOAD_CRMATH = -L$(MESA_DIR)/lib -lcrmath -lcrlibm
 endif
 
-# step 3) LAPACK and BLAS: use the sources shipped with mesa/mtx
+# step 3) LAPACK and BLAS: reference LAPACK from MSYS2 (mingw-w64-ucrt-x86_64-lapack), linked
+#         statically (MESA >= 25 no longer ships the LAPACK sources in mesa/mtx)
 
-WHICH_LAPACK95 =
-WHICH_LAPACK = USE_SRCS
-WHICH_BLAS = USE_SRCS
 LOAD_LAPACK95 =
-LOAD_LAPACK = -lmesalapack
-LOAD_BLAS = -lmesablas
+LOAD_LAPACK = -L$(MESA_WIN_TOOLCHAIN)/lib -Wl,-Bstatic -llapack -Wl,-Bdynamic
+LOAD_BLAS = -Wl,-Bstatic -lblas -Wl,-Bdynamic
 
 
 # step 4) PGPLOT
@@ -165,7 +163,7 @@ LOCAL_LIB_DIR = $(PACKAGE_DIR)/make
 MESA_LIB_DIR = $(MESA_DIR)/lib
 MESA_INCLUDE_DIR = $(MESA_DIR)/include
 TEST_INCLUDES = -I$(LOCAL_LIB_DIR) -I$(PACKAGE_DIR)/public -I$(MESA_INCLUDE_DIR)
-TEST_COMPILE_FLAGS = $(FCbasic) $(FCopenmp) $(TEST_INCLUDES) $(FCchecks) $(FCdebug) $(LIB_FLAGS) -c
+TEST_COMPILE_FLAGS = $(FCbasic) $(FCopenmp) $(TEST_INCLUDES) $(FCchecks) $(FCdebug) $(LIB_FLAGS) $(FCstandard) $(FCimpno) -c
 TEST_COMPILE = $(FC) $(TEST_COMPILE_FLAGS) $(LD_FLAGS)
 
 # Library lists / linking commands
@@ -180,7 +178,7 @@ LOAD_MESA_NUMERICS_INT = $(addprefix -l,$(LIBS_MESA_NUMERICS))
 LOAD_MESA_NUMERICS_EXT = $(LOAD_MATRIX_EXT) $(LOAD_HDF5)
 LOAD_MESA_NUMERICS = $(LOAD_MESA_NUMERICS_INT) $(LOAD_MESA_NUMERICS_EXT)
 
-LIBS_MESA_MICRO = star_data net eos kap rates neu chem $(LIBS_MESA_NUMERICS)
+LIBS_MESA_MICRO = net eos kap rates neu chem $(LIBS_MESA_NUMERICS)
 LOAD_MESA_MICRO_INT = $(addprefix -l,$(LIBS_MESA_MICRO))
 LOAD_MESA_MICRO_EXT = $(LOAD_MESA_NUMERICS_EXT)
 LOAD_MESA_MICRO = $(LOAD_MESA_MICRO_INT) $(LOAD_MESA_MICRO_EXT)
@@ -190,7 +188,7 @@ LOAD_MESA_MACRO_INT = $(addprefix -l,$(LIBS_MESA_MACRO))
 LOAD_MESA_MACRO_EXT = $(LOAD_MESA_MICRO_EXT)
 LOAD_MESA_MACRO = $(LOAD_MESA_MACRO_INT) $(LOAD_MESA_MACRO_EXT)
 
-LIBS_MESA_STAR_SUPPORT = $(LIBS_GYRE) $(LIBS_MESA_MACRO)
+LIBS_MESA_STAR_SUPPORT = star_data $(LIBS_GYRE) $(LIBS_MESA_MACRO)
 LOAD_MESA_STAR_SUPPORT_INT = $(addprefix -l,$(LIBS_MESA_STAR_SUPPORT))
 LOAD_MESA_STAR_SUPPORT_EXT = $(LOAD_MESA_MACRO_EXT) $(LD_FLAGS)
 LOAD_MESA_STAR_SUPPORT = $(LOAD_MESA_STAR_SUPPORT_INT) $(LOAD_MESA_STAR_SUPPORT_EXT)

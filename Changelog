@@ -1,3 +1,6 @@
+2026-10-13: Windows natywnie: MESA 26.04.1, dodatkowy pakiet MSYS2 mingw-w64-ucrt-x86_64-lapack.
+Sprawdzone na Windows 11 (AMD Ryzen 9 5900X): MESA 26.04.1 + gfortran 16.1 (MSYS2).
+
 2026-10-13: Usunięto z inlist.pgstar linię pause = .false. W MESA 26.x parametr nazywa się pause_flag
 i stara nazwa kończy obliczenia po pierwszym kroku błędem:
 

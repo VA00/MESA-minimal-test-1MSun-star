@@ -31,10 +31,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $here = $PSScriptRoot
 
-# Modules in the order of mesa/install (gyre is built as a stub; adipls, astero, binary skipped)
-$allModules = @('const', 'utils', 'math', 'mtx', 'auto_diff', 'forum', 'num', 'interp_1d', 'interp_2d',
-                'chem', 'colors', 'eos', 'kap', 'rates', 'neu', 'net', 'star_data', 'turb',
-                'ionization', 'atm', 'gyre', 'star')
+# Modules not needed by mesa/star (gyre is built as a stub)
+$skipModules = @('adipls', 'astero', 'binary', 'sample')
 
 function Write-Step([string]$msg) { Write-Host "`n=== $msg" -ForegroundColor Cyan }
 function Fail([string]$msg) { Write-Host "`nFAILED: $msg" -ForegroundColor Red; exit 1 }
@@ -64,7 +62,11 @@ $env:MESA_WIN_TOOLCHAIN = $Toolchain
 $tcBin = ($Toolchain -replace '/', '\') + '\bin'
 if (-not ($env:PATH -split ';' | Where-Object { $_ -eq $tcBin })) { $env:PATH = "$tcBin;$env:PATH" }
 
-Write-Step "MESA_DIR = $MesaDir"
+Write-Step "MESA_DIR = $MesaDir ($((Get-Content "$MesaDir/data/version_number" -ErrorAction SilentlyContinue) -join ''))"
+
+# Modules in the order of mesa/install of this MESA version
+$allModules = Select-String -Path "$MesaDir/install" -Pattern '^\s*do_one(_parallel)?\s+(\w+)' |
+    ForEach-Object { $_.Matches[0].Groups[2].Value } | Where-Object { $skipModules -notcontains $_ }
 foreach ($exe in 'gfortran', 'gcc', 'ar', 'mingw32-make', 'tar') {
     if (-not (Get-Command $exe -ErrorAction SilentlyContinue)) {
         Fail "$exe not found. Install with: C:\msys64\usr\bin\pacman.exe -S mingw-w64-ucrt-x86_64-gcc-fortran mingw-w64-ucrt-x86_64-make mingw-w64-ucrt-x86_64-hdf5"
@@ -112,7 +114,6 @@ $c = Get-Content -Raw $cfile
 if ($c -notmatch 'MESA_WINDOWS_PATCH') {
     Write-Step 'Patching utils/private/utils_c_system.c for Windows'
     $winBlock = @'
-#include "utils_c_system.h"
 
 /* MESA_WINDOWS_PATCH: POSIX compatibility for MinGW-w64 */
 #ifdef _WIN32
@@ -120,6 +121,14 @@ if ($c -notmatch 'MESA_WINDOWS_PATCH') {
 #include <io.h>
 #define mkdir(path, mode) _mkdir(path)
 #define realpath(name, resolved) _fullpath((resolved), (name), 4096)
+/* POSIX rename() replaces an existing destination file, the Windows CRT one fails */
+__declspec(dllimport) int __stdcall MoveFileExA(const char *, const char *, unsigned long);
+static int mesa_win_rename(const char *src, const char *dest) {
+    if (MoveFileExA(src, dest, 0x1 | 0x2)) return 0; /* REPLACE_EXISTING | COPY_ALLOWED */
+    errno = EACCES;
+    return -1;
+}
+#define rename(src, dest) mesa_win_rename(src, dest)
 #ifndef S_IRGRP
 #define S_IRGRP 0
 #endif
@@ -133,7 +142,10 @@ if ($c -notmatch 'MESA_WINDOWS_PATCH') {
 #define O_BINARY 0
 #endif
 '@
-    $c = $c.Replace('#include "utils_c_system.h"', $winBlock.TrimEnd())
+    # insert after the last #include (all system headers must be read before the macros)
+    $incs = [regex]::Matches($c, '(?m)^#include[^\r\n]*\r?\n')
+    $pos = $incs[$incs.Count - 1].Index + $incs[$incs.Count - 1].Length
+    $c = $c.Insert($pos, $winBlock.TrimEnd() + "`n")
     $c = $c.Replace('open(src, O_RDONLY)', 'open(src, O_RDONLY | O_BINARY)')
     $c = $c.Replace('O_CREAT | O_WRONLY | O_TRUNC,', 'O_CREAT | O_WRONLY | O_TRUNC | O_BINARY,')
     Set-Content -NoNewline -Path $cfile -Value $c
@@ -174,8 +186,16 @@ $dataSteps = [ordered]@{
         Copy-Item "$MesaDir/chem/data/*" "$data/chem_data/" -Force
     }
     colors_data = {
-        New-Item -ItemType Directory -Force "$data/colors_data" | Out-Null
-        Copy-Item "$MesaDir/colors/data/lcb98cor.dat", "$MesaDir/colors/data/blackbody_johnson.dat" "$data/colors_data/"
+        $cd = "$data/colors_data"
+        if (Test-Path "$cd/colors_data.txz") {
+            # MESA >= 25: filters and stellar models, unpacked in place
+            New-Item -ItemType Directory -Force "$cd/filters", "$cd/stellar_models" | Out-Null
+            Expand-Tar "$cd/colors_data.txz" $cd
+            New-Item -ItemType File -Force "$cd/.extraction_complete" | Out-Null
+        } else {
+            New-Item -ItemType Directory -Force $cd | Out-Null
+            Copy-Item "$MesaDir/colors/data/lcb98cor.dat", "$MesaDir/colors/data/blackbody_johnson.dat" "$cd/"
+        }
     }
     eosDT_data = {
         Get-ChildItem "$data" -Directory -Filter 'eos*' | Remove-Item -Recurse -Force
@@ -212,9 +232,14 @@ $dataSteps = [ordered]@{
     }
 }
 foreach ($name in $dataSteps.Keys) {
-    if ($ForceData -or -not (Test-Path "$data/$name")) {
+    $newColors = $name -eq 'colors_data' -and (Test-Path "$data/colors_data/colors_data.txz")
+    $done = if ($newColors) { "$data/colors_data/.extraction_complete" } else { "$data/$name" }
+    if ($ForceData -or -not (Test-Path $done)) {
         Write-Step "Installing data: $name"
-        try { & $dataSteps[$name] } catch { Remove-Item -Recurse -Force "$data/$name" -ErrorAction SilentlyContinue; Fail "data $name : $_" }
+        try { & $dataSteps[$name] } catch {
+            if (-not $newColors) { Remove-Item -Recurse -Force "$data/$name" -ErrorAction SilentlyContinue }
+            Fail "data $name : $_"
+        }
     }
 }
 
@@ -222,9 +247,10 @@ foreach ($name in $dataSteps.Keys) {
 function Build-Forum {
     $f = "$MesaDir/forum"
     if (-not (Test-Path "$f/forum/src")) {
+        $tgz = Get-ChildItem "$f/forum-*.tar.gz" | Sort-Object Name | Select-Object -Last 1
         Remove-Item -Recurse -Force "$f/forum" -ErrorAction SilentlyContinue
-        Expand-Tar "$f/forum-1.0.3.tar.gz" $f
-        Rename-Item "$f/forum-1.0.3" 'forum'
+        Expand-Tar $tgz.FullName $f
+        Rename-Item "$f/$($tgz.Name -replace '\.tar\.gz$', '')" 'forum'
     }
     $b = "$f/forum/build_win"
     New-Item -ItemType Directory -Force $b | Out-Null

@@ -56,7 +56,7 @@ Obliczenia trwają od poniżej 1~godziny (szybki komputer) do kilku godzin.
   
   
   \textbf{UWAGA:} \textit{PSDK od wersji 26.3 ma kompilator gcc 15.2, z którym MESA 24.08.1 rozbiega się już
-  w pierwszym kroku (dodatek~\ref{app:win}, punkt~5).}
+  w pierwszym kroku.}
 \end{itemize}
 
 % =====================================================================
@@ -290,6 +290,7 @@ C:\msys64\usr\bin\pacman.exe -Syu --noconfirm
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-gcc-fortran
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-make
 C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-hdf5
+C:\msys64\usr\bin\pacman.exe -S --needed --noconfirm mingw-w64-ucrt-x86_64-lapack
 \end{verbatim}
 \end{footnotesize}
 \item Python i Git, a potem \textbf{nowe okno} PowerShell~7:
@@ -301,12 +302,12 @@ winget install --id Git.Git -e
 \begin{verbatim}
 mkdir C:\MESA
 cd C:\MESA
-curl.exe -L -O https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
-tar -xf mesa-24.08.1.zip
+curl.exe -L -O https://zenodo.org/records/19722306/files/mesa-26.04.1.zip
+tar -xf mesa-26.04.1.zip
 \end{verbatim}
   W sieci OA zamiast Zenodo:
 \begin{verbatim}
-curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-24.08.1.zip
+curl.exe -L -O http://wolarz.oa.uj.edu.pl/repo/mesa-26.04.1.zip
 \end{verbatim}
 \item Pobranie przykładu:
 \begin{verbatim}
@@ -521,6 +522,7 @@ AMD Ryzen 7 7435HS 3,1 GHz, 16 GB RAM, Windows 11, WSL2 & 2: 393,79; 4: 198,33; 
 MacBook Air M4, 16 GB RAM & 2: nie skończył przez całe zajęcia \\
 Intel i7-4770K 3,4 GHz, 16 GB RAM, Ubuntu & 1: 783,99; 2: 420,83; 3: 308,45; 4: 246,79; 5: 237,08; 6: 227,10; 7: 218,53; 8: 210,82 \\
 AMD Ryzen 9 5900X, 32 GB RAM, Windows 11 natywnie (gfortran 16.1 MinGW) & 12: 70,77 \\
+AMD Ryzen 9 5900X, 32 GB RAM, Windows 11 natywnie, MESA 26.04.1 bez FreeEOS (340 powtórzeń, 14\,299 kroków) & 12: 65,26 \\
 \bottomrule
 \end{tabular}
 \end{small}
@@ -534,8 +536,8 @@ obliczenia szły 0,34~modelu na sekundę, a~po jego zatrzymaniu 3,58~modelu na s
 \appendix
 \section{Windows natywnie: szczegóły i rozwiązywanie problemów}\label{app:win}
 
-Sprawdzone 6--7~października 2026: Windows~11, AMD Ryzen~9 5900X, 32~GB RAM, gfortran 16.1.0
-(MSYS2), HDF5 2.1.1. Ograniczenia: brak wykresów pgstar (MESA zbudowana bez PGPLOT,
+Sprawdzone 13~października 2026: Windows~11, AMD Ryzen~9 5900X, 32~GB RAM, MESA 26.04.1,
+gfortran 16.1.0, HDF5 2.1.1 i LAPACK 3.12.1 (MSYS2). Ograniczenia: brak wykresów pgstar (MESA zbudowana bez PGPLOT,
 \texttt{pgstar\_flag} jest ignorowane), nie są budowane GYRE, ADIPLS, \texttt{binary} i
 \texttt{astero}, wyniki nie są identyczne bit w bit z~Linuksem (różnice na poziomie zaokrągleń).
 
@@ -563,33 +565,20 @@ $10^{-5}$) i \texttt{net} (jedna linia, różnica $5\cdot10^{-7}$).
   \verb!utils\makefile_header! w wersji dla Windows. Narzędzia z~MESA SDK zastąpiono skryptami
   PowerShell (\texttt{makedepf90.ps1}, \texttt{cp\_if\_newer.ps1}), a bashowe \texttt{install}
   i~\texttt{build\_data\_and\_export} skryptem \texttt{install\_mesa.ps1}. Biblioteka forum (z GYRE)
-  jest preprocesowana programem \texttt{fypp}. LAPACK/BLAS pochodzą ze źródeł w~\texttt{mesa/mtx},
-  HDF5 z~MSYS2 (linkowana statycznie). GYRE jest zastąpione stubem.
+  jest preprocesowana programem \texttt{fypp}. LAPACK/BLAS i HDF5 pochodzą z~MSYS2 (linkowane
+  statycznie). GYRE jest zastąpione stubem.
 \item \textbf{Plik C} \verb!utils\private\utils_c_system.c! używa funkcji POSIX, których MinGW nie
-  ma w tej postaci (\texttt{mkdir(path, mode)}, \texttt{realpath}, brak \texttt{O\_BINARY}). Łata
-  jest ujęta w \verb!#ifdef _WIN32!.
-\item \textbf{Błąd ustawień regionalnych w libgfortran (MinGW/UCRT).} Wokół każdej instrukcji
-  wejścia-wyjścia libgfortran przełącza locale na „C”, po czym „przywraca” poprzednie wskaźnikiem
-  do już zwolnionej pamięci. Proces przechodzi wtedy na locale użytkownika
-  (\texttt{Polish\_Poland.1250}, przecinek dziesiętny). W wątkach OpenMP liczba „0.6000” jest
-  odczytywana jako 0 i MESA przerywa wczytywanie tablic EOS (\texttt{bad header info}). Na Windows
-  z angielskimi ustawieniami regionalnymi błąd się nie ujawnia. Poprawka:
-  \texttt{mesa\_win\_locale.c} przechwytuje \texttt{setlocale}
-  (\verb!-Wl,--wrap=__imp_setlocale!, libgfortran statycznie) i utrzymuje locale „C”. Przy okazji
-  odczyt plików tekstowych jest ok.~2 razy szybszy. \texttt{libgomp} i \texttt{libwinpthread}
-  pozostają dynamiczne, bo wersja w pełni statyczna czytała pliki ok.~2,5 razy wolniej.
+  ma w tej postaci (\texttt{mkdir(path, mode)}, \texttt{realpath}, brak \texttt{O\_BINARY}), oraz
+  \texttt{rename()}, które w Windows nie nadpisuje istniejącego pliku. Łata jest ujęta
+  w \verb!#ifdef _WIN32!.
+\item \textbf{Ustawienia regionalne.} libgfortran (MinGW/UCRT) przestawia proces na locale
+  użytkownika (\texttt{Polish\_Poland.1250}, przecinek dziesiętny) i w wątkach OpenMP liczby z kropką
+  są czytane błędnie. \texttt{mesa\_win\_locale.c} przechwytuje \texttt{setlocale}
+  (\verb!-Wl,--wrap=__imp_setlocale!, libgfortran linkowana statycznie) i utrzymuje locale „C”.
 \item \textbf{Stos.} Windows daje głównemu wątkowi 2~MB stosu (Linux: 8~MB lub
   \texttt{ulimit -s unlimited}). \texttt{star.exe} jest linkowany z rezerwacją 1~GB
   (\verb!-Wl,--stack,1073741824!), a~wątkom OpenMP \texttt{mesa\_env.ps1} ustawia
   \texttt{OMP\_STACKSIZE=512M}.
-\item \textbf{Błąd w MESA ujawniany przez gfortran $\geq$ 15.} Pętle zamiany elementów według
-  pivotów mają dyrektywę \verb+!$omp simd+, choć ich iteracje nie są niezależne (plik
-  \verb!mtx\public\mtx_solve_routines.inc!, dołączany do solvera
-  \verb!star\private\star_bcyclic.f90!). To niezdefiniowane zachowanie: z nowymi
-  kompilatorami już pierwsza iteracja Newtona jest rozbieżna (\texttt{sizeB}), nawet przy starcie
-  z modelu ZAMS. Błąd jest znany autorom (lista mesa-users, marzec 2026, MESA SDK 26.3.1 z gfortran
-  15.2) i poprawiony w repozytorium MESA (commit \texttt{03ef2a5}, luty 2026).
-  \texttt{install\_mesa.ps1} nakłada tę poprawkę (usuwa trzy linie) przed kompilacją.
 \item \textbf{Drobiazgi.} W \verb!chem\make\makefile_base! usunięto \verb!-m %m.mod!
   (\texttt{cmd.exe} traktuje \verb!%m! jak zmienną). Dowiązanie \texttt{pgstar.f90} zastępuje kopia
   \texttt{pgstar\_stub.f90}. \texttt{star.exe} potrzebuje \texttt{libgomp-1.dll}
@@ -615,29 +604,10 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
   instalacja.
 \item[\texttt{tar}: \texttt{Error opening archive} przy pliku \texttt{.zip}]
   Przed systemowym \texttt{tar} w \texttt{PATH} jest GNU tar (z Git lub MSYS2). Pełna ścieżka:
-  \verb!C:\Windows\System32\tar.exe -xf mesa-24.08.1.zip!.
+  \verb!C:\Windows\System32\tar.exe -xf mesa-26.04.1.zip!.
 \item[\texttt{Python 3 not found}, otwiera się Microsoft Store]
   Zainstaluj Pythona i otwórz nowe okno PowerShell. Alias Sklepu można wyłączyć w~\emph{Ustawienia
   → Aplikacje → Zaawansowane ustawienia aplikacji → Aliasy wykonywania aplikacji}.
-\item[Rozbieżność już w pierwszym kroku (\texttt{correction rejected by sizeB})]
-  Kończy się komunikatem \texttt{dt < min\_timestep\_limit}. Objaw błędu z punktu~5, np.~gdy MESA
-  była skompilowana bez poprawki. Przebuduj moduły i katalog roboczy:
-\begin{footnotesize}
-\begin{verbatim}
-C:\MESA\MESA-minimal-test-1MSun-star\windows\install_mesa.ps1 -Modules mtx,net,star -Clean
-./clean
-./mk
-\end{verbatim}
-\end{footnotesize}
-\item[\texttt{bad header info in ...eosFreeEOS\_data...}]
-  Objaw błędu z punktu~3. Usuń pliki cache zapisane przez wadliwy program i zbuduj
-  \texttt{star.exe} ponownie (\verb!./clean!, \verb!./mk!):
-\begin{verbatim}
-Remove-Item C:\MESA\mesa-24.08.1\data\*\cache\*.bin
-\end{verbatim}
-\item[\texttt{star.exe} kończy się natychmiast, bez komunikatów (kod \texttt{0xC00000FD})]
-  Przepełnienie stosu (punkt~4): ponownie \texttt{install\_mesa.ps1}, potem \verb!./clean!,
-  \verb!./mk!.
 \item[Pierwsze uruchomienie jest bardzo wolne]
   Tworzenie plików cache (jednorazowo). Rozpakowywanie i kompilację spowalnia też antywirus.
   Można (jako administrator) wyłączyć skanowanie katalogu \verb!C:\MESA!.

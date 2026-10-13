@@ -21,12 +21,15 @@ if (-not $MesaDir) {
     if ($env:MESA_DIR) {
         $MesaDir = $env:MESA_DIR
     } else {
+        # newest mesa-<version> directory next to the repository (or in C:\MESA)
         $repo = Split-Path $PSScriptRoot
-        $candidates = @((Join-Path (Split-Path $repo) 'mesa-24.08.1'), (Join-Path $repo 'mesa-24.08.1'), 'C:\MESA\mesa-24.08.1')
-        $MesaDir = $candidates | Where-Object { Test-Path (Join-Path $_ 'star') } | Select-Object -First 1
+        $places = @((Split-Path $repo), 'C:\MESA') | Select-Object -Unique
+        $MesaDir = Get-ChildItem $places -Directory -Filter 'mesa-*' -ErrorAction SilentlyContinue |
+            Where-Object { $_.Name -match '^mesa-(\d+\.\d+\.\d+)$' -and (Test-Path (Join-Path $_.FullName 'star')) } |
+            Sort-Object { [version]($_.Name -replace '^mesa-', '') } | Select-Object -Last 1 -ExpandProperty FullName
         if (-not $MesaDir) {
-            Write-Host "MESA not found in: $($candidates -join ', ')" -ForegroundColor Red
-            Write-Host 'Give the path explicitly: . <...>\windows\mesa_env.ps1 -MesaDir <path to mesa-24.08.1>'
+            Write-Host "MESA (mesa-<version>) not found in: $($places -join ', ')" -ForegroundColor Red
+            Write-Host 'Give the path explicitly: . <...>\windows\mesa_env.ps1 -MesaDir <path to mesa>'
             return
         }
     }
