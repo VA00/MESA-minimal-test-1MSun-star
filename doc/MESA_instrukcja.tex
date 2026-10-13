@@ -51,8 +51,8 @@ Obliczenia trwają od poniżej 1~godziny (szybki komputer) do kilku godzin.
   \item Pamięć: 8~GB RAM to minimalne oficjalne wymagania. Jeżeli w~pliku \texttt{inlist} ustawimy \verb#use_FreeEOS = .false.# (od 12~października 2026 ustawienie domyślne) obliczenia zajmują najwyżej ok.~2.7~GiB (rozdział~\ref{sec:pamiec}).
   Wcześniej sam program zajmował do 7.8~GiB i na komputerach pracownianych z~7.6~GiB obliczenia się zawieszały.
   \item Ścieżki do katalogów z MESA \textbf{nie mogą zawierać spacji}.
-  \item MESA SDK \textbf{dokładnie w podanej wersji} (Linux, WSL: 24.7.1; macOS: 25.8.1), nie
-  najnowszej. 
+  \item MESA SDK \textbf{dokładnie w podanej wersji} (Linux, WSL: 24.7.1, nie
+  najnowszej; macOS: 26.6.1 z MESA 26.04.1). 
   
   
   \textbf{UWAGA:} \textit{PSDK od wersji 26.3 ma kompilator gcc 15.2, z którym MESA 24.08.1 rozbiega się już
@@ -191,12 +191,12 @@ i ustawić \texttt{MESA\_DIR} oraz \texttt{MESASDK\_ROOT} na nowe położenie.
 % =====================================================================
 \section{macOS (Apple Silicon)}\label{sec:mac}
 
-Aktualizacja: 12 października 2025 (MESA SDK 25.8.1, MESA 24.08.1).
+Aktualizacja: 13 października 2026 (MESA SDK 26.6.1, MESA 26.04.1).
 
 \begin{enumerate}
-\item Pobieramy i instalujemy MESA SDK dla Apple Silicon, wersja 25.8.1 (sierpień 2025), ze strony\\
+\item Pobieramy i instalujemy MESA SDK dla Apple Silicon, wersja 26.6.1 (czerwiec 2026), ze strony\\
   \url{http://user.astro.wisc.edu/~townsend/static.php?ref=mesasdk}\\
-  plik \texttt{mesasdk-aarch64-macos-25.8.1.pkg} (nie najnowszy, rozdział~\ref{sec:wymagania}).
+  plik \texttt{mesasdk-aarch64-macos-26.6.1.pkg}.
   Instalacja jest okienkowa, po kliknięciu na pobraną „paczkę”. SDK trafia do
   \verb!/Applications/mesasdk!. Starsza wersja 24.10.1 już nie działa.
 \item Zmienne środowiskowe (domyślna powłoka zsh jest zgodna z bash):
@@ -204,18 +204,18 @@ Aktualizacja: 12 października 2025 (MESA SDK 25.8.1, MESA 24.08.1).
 export MESASDK_ROOT=/Applications/mesasdk
 source $MESASDK_ROOT/bin/mesasdk_init.sh
 \end{verbatim}
-\item Pobieramy MESA (plik zip z Zenodo, \url{https://zenodo.org/records/13353788}). Safari sam
-  rozpakowuje archiwum. Cały katalog \texttt{mesa-24.08.1} najlepiej przenieść do \verb!~/MESA!.
+\item Pobieramy MESA (plik zip z Zenodo, \url{https://zenodo.org/records/19722306}). Safari sam
+  rozpakowuje archiwum. Cały katalog \texttt{mesa-26.04.1} najlepiej przenieść do \verb!~/MESA!.
   To samo z terminala:
 \begin{verbatim}
 mkdir ~/MESA
 cd ~/MESA
-curl -L -O https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
-unzip mesa-24.08.1.zip
+curl -L -O https://zenodo.org/records/19722306/files/mesa-26.04.1.zip
+unzip mesa-26.04.1.zip
 \end{verbatim}
 \item Kolejne zmienne:
 \begin{verbatim}
-export MESA_DIR=$HOME/MESA/mesa-24.08.1
+export MESA_DIR=$HOME/MESA/mesa-26.04.1
 export OMP_NUM_THREADS=8
 export PATH=$PATH:$MESA_DIR/scripts/shmesa
 \end{verbatim}
