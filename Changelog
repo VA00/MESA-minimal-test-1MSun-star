@@ -1,3 +1,9 @@
+2026-10-13: Instrukcja, WSL: cała procedura w rozdziale WSL (bez odsyłania do rozdziału Linux),
+MESA SDK 26.6.1 (katalog mesasdk-26.6.1) i MESA 26.04.1. Najpierw PowerShell 7, wsl --install
+z PowerShell 7 jako administrator, apt upgrade, krótsza lista pakietów, wget -c i md5sum.
+Usunięto krok z .wslconfig. Kroki 1-6 sprawdzone na Windows 10 22H2 (stary laptop Lenovo, 12 GB RAM),
+kompilacja MESA w toku.
+
 2026-10-13: Windows natywnie: MESA 26.04.1, dodatkowy pakiet MSYS2 mingw-w64-ucrt-x86_64-lapack.
 Sprawdzone na Windows 11 (AMD Ryzen 9 5900X): MESA 26.04.1 + gfortran 16.1 (MSYS2).
 

@@ -110,8 +110,7 @@ Sprawdzone 12~października 2026 na Ubuntu 24.04 (MESA SDK 24.7.1, MESA 24.08.1)
 \begin{verbatim}
 mkdir ~/MESA
 cd ~/MESA
-wget -U firefox \
-http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/mesasdk-x86_64-linux-24.7.1.tar.gz
+wget -U firefox http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/mesasdk-x86_64-linux-24.7.1.tar.gz
 wget https://zenodo.org/records/13353788/files/mesa-24.08.1.zip
 \end{verbatim}
 \end{footnotesize}
@@ -240,30 +239,76 @@ przypisać symulację do wybranych rdzeni poleceniem \texttt{taskset}. Jak zrobi
 % =====================================================================
 \section{Windows -- WSL (zalecane)}\label{sec:wsl}
 
-TODO: co to za brednie? 
+
 
 \begin{enumerate}
-\item W PowerShell \textbf{uruchomionym jako administrator}, potem restart komputera:
+\item Instalujemy PowerShell~7 (Win+R, \texttt{powershell}):
+\begin{verbatim}
+winget install --id Microsoft.PowerShell -e
+\end{verbatim}
+\item W PowerShell~7 \textbf{uruchomionym jako administrator} (Win+R, \texttt{pwsh} i~Ctrl+Shift+Enter)
+ 
 \begin{verbatim}
 wsl --install
 \end{verbatim}
-  W oknie Ubuntu, które otworzy się po restarcie, zakładamy użytkownika i hasło.
-\item Pamięć dla WSL. W zwykłym PowerShell:
-\begin{verbatim}
-notepad $env:USERPROFILE\.wslconfig
-\end{verbatim}
-  wpisujemy (np.~dla komputera z 16~GB RAM)
-\begin{verbatim}
-[wsl2]
-memory=12GB
-\end{verbatim}
-  zapisujemy plik i wykonujemy \verb!wsl --shutdown!.
+  Jak skończy, restartujemy komputer. W~Windows~10 po restarcie Ubuntu pobiera się jeszcze raz. W~oknie Ubuntu zakładamy użytkownika
+  (małe litery, bez spacji i polskich znaków) i hasło. Hasła przy wpisywaniu nie widać.
 \item W oknie Ubuntu:
 \begin{verbatim}
+cd ~
 sudo apt update
-sudo apt install tcsh zlib1g-dev libx11-dev binutils make perl unzip wget git
+sudo apt upgrade
+sudo apt install tcsh zlib1g-dev libx11-dev make
 \end{verbatim}
-  i dalej według rozdziału~\ref{sec:linux}, w katalogu \verb!~/MESA! (\textbf{nie} w \verb!/mnt/c!).
+\item Pobieramy MESA SDK (ok.~200~MB) i MESA (ok.~2.3~GB). Serwer SDK odrzuca pobieranie bez \texttt{-U firefox}:
+\begin{footnotesize}
+\begin{verbatim}
+mkdir ~/MESA
+cd ~/MESA
+wget -U firefox http://user.astro.wisc.edu/~townsend/resource/download/mesasdk/mesasdk-x86_64-linux-26.6.1.tar.gz
+wget https://zenodo.org/records/19722306/files/mesa-26.04.1.zip
+\end{verbatim}
+\end{footnotesize}
+  Jeżeli pobieranie MESA się przerwie, dokańczamy je poleceniem:
+\begin{verbatim}
+wget -c https://zenodo.org/records/19722306/files/mesa-26.04.1.zip
+\end{verbatim}
+  Sprawdzamy, czy plik jest cały:
+\begin{verbatim}
+md5sum mesa-26.04.1.zip
+\end{verbatim}
+  Wynik musi być \texttt{994fd28f38da92efc80e38ca11d8317b}.
+\item Rozpakowujemy SDK i sprawdzamy kompilator:
+\begin{verbatim}
+tar xvfz mesasdk-x86_64-linux-26.6.1.tar.gz -C ~/MESA/
+export MESASDK_ROOT=~/MESA/mesasdk-26.6.1
+source $MESASDK_ROOT/bin/mesasdk_init.sh
+\end{verbatim}
+Instalację SDK sprawdzamy poprzez:
+\begin{verbatim}
+gfortran --version
+\end{verbatim}
+  Oczekiwana wersja \texttt{GNU Fortran (GCC) 15.2.0}.
+\item Rozpakowujemy MESA:
+\begin{verbatim}
+cd ~/MESA
+unzip mesa-26.04.1.zip
+export MESA_DIR=~/MESA/mesa-26.04.1
+\end{verbatim}
+\item Kompilacja MESA:
+\begin{verbatim}
+cd $MESA_DIR
+./install
+\end{verbatim}
+  Na końcu powinien pojawić się napis \texttt{MESA installation was successful}.
+\item Pobieramy i uruchamiamy przykład:
+\begin{verbatim}
+cd ~/MESA
+git clone https://github.com/VA00/MESA-minimal-test-1MSun-star.git
+cd MESA-minimal-test-1MSun-star
+./mk
+./rn
+\end{verbatim}
 \end{enumerate}
 
 % =====================================================================
