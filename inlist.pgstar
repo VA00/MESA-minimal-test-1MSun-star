@@ -35,7 +35,7 @@
   TRho_Profile_file_flag = .true.       
   TRho_Profile_file_dir = 'png'
   TRho_Profile_file_prefix = 'trho_profile_'
-  TRho_Profile_file_interval = 8
+  TRho_Profile_file_interval = 4
   TRho_Profile_file_width = 22.58
   TRho_Profile_file_aspect_ratio = 0.5624
 
@@ -50,7 +50,7 @@
   HR_file_width = 22.58
   HR_file_aspect_ratio = 0.5624
   HR_file_prefix = 'HR_'
-  HR_file_interval = 1
+  HR_file_interval = 4
 
 ! Diagram Kippenhahna
 
@@ -82,7 +82,7 @@
   Kipp_file_width = 22.58
   Kipp_file_aspect_ratio = 0.5624
   Kipp_file_prefix = 'Kippenhahn_'
-  Kipp_file_interval = 8
+  Kipp_file_interval = 4
 
 ! Abundancje 
 
@@ -90,7 +90,7 @@
   Abundance_file_flag = .true.
   Abundance_file_width = 22.58
   Abundance_file_aspect_ratio = 0.5624
-  Abundance_file_interval = 1
+  Abundance_file_interval = 4
   Abundance_xaxis_name = 'zone' ! 'zone', 'logR', 'radius', 'mass', 'logM', 'logP'
   Abundance_xaxis_reversed = .true. ! only for 'zone'
   Abundance_txt_scale = 1.16
@@ -102,13 +102,13 @@
   Power_xaxis_reversed = .false.
   Power_file_width = 22.58
   Power_file_aspect_ratio = 0.5624
-  Power_file_interval = 1
+  Power_file_interval = 4
   Power_txt_scale = 1.16
 
 
   History_Panels1_file_flag = .false.
   History_Panels1_file_width = 22.58
-  History_Panels1_file_interval = 1
+  History_Panels1_file_interval = 4
   History_Panels1_file_aspect_ratio = 0.5624
   
 
@@ -116,7 +116,7 @@
   History_Track1_title = 'Temperatura - gestosc'
   History_Track1_file_width = 22.58
   History_Track1_file_aspect_ratio = 0.5624
-  History_Track1_file_interval = 1
+  History_Track1_file_interval = 4
   History_Track1_yname = 'log_cntr_Rho'
   History_Track1_xname = 'log_cntr_T'
   History_Track1_xaxis_label = 'log T\dc'
@@ -130,14 +130,14 @@
   Summary_Burn_file_flag = .true.
   Summary_Burn_file_width = 22.58
   Summary_Burn_file_aspect_ratio = 0.5624
-  Summary_Burn_file_interval = 1
+  Summary_Burn_file_interval = 4
   Summary_Burn_txt_scale = 1.16
 
 
   Network_file_flag = .false.
   Network_file_width = 22.58d0
   Network_file_aspect_ratio = 1.5d0
-  Network_file_interval = 1
+  Network_file_interval = 4
   Network_txt_scale = 1.16d0
   Network_nmin = 0.0d0
   Network_nmax = 32.0d0
