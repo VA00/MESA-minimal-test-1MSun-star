@@ -28,7 +28,10 @@
   energy_eqn_option = 'dedt'
   varcontrol_target = 1.0d-3
 
-  log_L_lower_limit = -3.9d0
+  log_L_lower_limit = -3.8d0     ! przy log L ~ -3.86 solver moze sie zawiesic
+  use_Ledoux_criterion = .true.  ! blokuje wciaganie H do blysku He (VLTP)
+  
+  extra_terminal_output_file = 'mesa.log'
 
 &end
 
